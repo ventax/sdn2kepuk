@@ -79,16 +79,21 @@ const revealObserver = new IntersectionObserver((entries) => {
 
 revealElements.forEach(el => revealObserver.observe(el));
 
+function observeNewRevealElements(container) {
+    if (!container || !revealObserver) return;
+    container.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+}
+
 // =====================
 // TEACHER FILTER
 // =====================
 function filterTeachers(event, category) {
     const cards = document.querySelectorAll('.teacher-card');
     const btns = document.querySelectorAll('.filter-btn');
-    
+
     btns.forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
-    
+
     cards.forEach((card, i) => {
         if (category === 'all' || card.dataset.category === category) {
             card.style.display = 'block';
@@ -107,74 +112,156 @@ function filterTeachers(event, category) {
 // =====================
 // TEACHER DATA & MODAL
 // =====================
-const teacherData = {
-    1: { 
-        name: 'Drs. Supriyanto, M.Pd', 
-        position: 'Kepala Sekolah', 
-        education: 'S2 Manajemen Pendidikan - UNY', 
-        experience: '25 Tahun', 
-        bio: 'Memimpin SD Negeri 2 Kepuk sejak 2018 dengan visi menciptakan sekolah unggul dalam prestasi dan karakter.', 
-        achievements: ['Kepala Sekolah Berprestasi Tingkat Kabupaten 2022', 'Sertifikasi Kepala Sekolah Nasional', 'Pelatihan Manajemen Berbasis Sekolah', 'Workshop Pengembangan Kurikulum Merdeka'], 
-        contact: { email: 'supriyanto@sdn2kepuk.sch.id', phone: '(0274) 123-4567' } 
+let teacherData = {
+    1: {
+        name: 'Drs. Supriyanto, M.Pd',
+        position: 'Kepala Sekolah',
+        education: 'S2 Manajemen Pendidikan - UNY',
+        experience: '25 Tahun',
+        bio: 'Memimpin SD Negeri 2 Kepuk sejak 2018 dengan visi menciptakan sekolah unggul dalam prestasi dan karakter.',
+        achievements: ['Kepala Sekolah Berprestasi Tingkat Kabupaten 2022', 'Sertifikasi Kepala Sekolah Nasional', 'Pelatihan Manajemen Berbasis Sekolah', 'Workshop Pengembangan Kurikulum Merdeka'],
+        contact: { email: 'supriyanto@sdn2kepuk.sch.id', phone: '(0274) 123-4567' }
     },
-    2: { 
-        name: 'Siti Maryam, S.Pd', 
-        position: 'Guru Kelas 1A', 
-        education: 'S1 PGSD - UNY', 
-        experience: '15 Tahun', 
-        bio: 'Spesialis pembelajaran anak usia dini dengan metode fun learning yang menyenangkan dan efektif.', 
-        achievements: ['Guru Berprestasi Kecamatan 2024', 'Juara 1 Lomba Inovasi Pembelajaran 2023', 'Sertifikasi Pendidik Profesional', 'Pelatihan Pembelajaran Abad 21'], 
-        contact: { email: 'siti.maryam@sdn2kepuk.sch.id', phone: '-' } 
+    2: {
+        name: 'Siti Maryam, S.Pd',
+        position: 'Guru Kelas 1A',
+        education: 'S1 PGSD - UNY',
+        experience: '15 Tahun',
+        bio: 'Spesialis pembelajaran anak usia dini dengan metode fun learning yang menyenangkan dan efektif.',
+        achievements: ['Guru Berprestasi Kecamatan 2024', 'Juara 1 Lomba Inovasi Pembelajaran 2023', 'Sertifikasi Pendidik Profesional', 'Pelatihan Pembelajaran Abad 21'],
+        contact: { email: 'siti.maryam@sdn2kepuk.sch.id', phone: '-' }
     },
-    3: { 
-        name: 'Budi Wijaya, S.Pd', 
-        position: 'Guru Kelas 2A', 
-        education: 'S1 PGSD - UNY', 
-        experience: '12 Tahun', 
-        bio: 'Ahli pengembangan kreativitas siswa melalui pembelajaran berbasis proyek dan seni.', 
-        achievements: ['Pembina Ekstrakurikuler Seni Terbaik 2023', 'Pelatihan Project Based Learning', 'Workshop Kreativitas Anak', 'Sertifikasi Pendidik Profesional'], 
-        contact: { email: 'budi.wijaya@sdn2kepuk.sch.id', phone: '-' } 
+    3: {
+        name: 'Budi Wijaya, S.Pd',
+        position: 'Guru Kelas 2A',
+        education: 'S1 PGSD - UNY',
+        experience: '12 Tahun',
+        bio: 'Ahli pengembangan kreativitas siswa melalui pembelajaran berbasis proyek dan seni.',
+        achievements: ['Pembina Ekstrakurikuler Seni Terbaik 2023', 'Pelatihan Project Based Learning', 'Workshop Kreativitas Anak', 'Sertifikasi Pendidik Profesional'],
+        contact: { email: 'budi.wijaya@sdn2kepuk.sch.id', phone: '-' }
     },
-    4: { 
-        name: 'Rina Anggraini, S.Pd', 
-        position: 'Guru Bahasa Inggris', 
-        education: 'S1 Pendidikan Bahasa Inggris - UNS', 
-        experience: '10 Tahun', 
-        bio: 'Berpengalaman mengajar dengan metode komunikatif dan interaktif untuk anak.', 
-        achievements: ['TOEFL Score: 550', 'Pelatihan Teaching English for Young Learners', 'Workshop Multimedia Learning', 'Sertifikasi Pendidik Profesional'], 
-        contact: { email: 'rina.anggraini@sdn2kepuk.sch.id', phone: '-' } 
+    4: {
+        name: 'Rina Anggraini, S.Pd',
+        position: 'Guru Bahasa Inggris',
+        education: 'S1 Pendidikan Bahasa Inggris - UNS',
+        experience: '10 Tahun',
+        bio: 'Berpengalaman mengajar dengan metode komunikatif dan interaktif untuk anak.',
+        achievements: ['TOEFL Score: 550', 'Pelatihan Teaching English for Young Learners', 'Workshop Multimedia Learning', 'Sertifikasi Pendidik Profesional'],
+        contact: { email: 'rina.anggraini@sdn2kepuk.sch.id', phone: '-' }
     },
-    5: { 
-        name: 'Ahmad Hidayat, S.Pd', 
-        position: 'Guru Penjasorkes', 
-        education: 'S1 Pendidikan Jasmani - UNY', 
-        experience: '8 Tahun', 
-        bio: 'Pelatih olahraga yang membawa siswa meraih prestasi di berbagai turnamen olahraga.', 
-        achievements: ['Pelatih Futsal Bersertifikat Lisensi C', 'Wasit Atletik Tingkat Kabupaten', 'Guru Olahraga Berprestasi 2023', 'Sertifikasi Pendidik Profesional'], 
-        contact: { email: 'ahmad.hidayat@sdn2kepuk.sch.id', phone: '-' } 
+    5: {
+        name: 'Ahmad Hidayat, S.Pd',
+        position: 'Guru Penjasorkes',
+        education: 'S1 Pendidikan Jasmani - UNY',
+        experience: '8 Tahun',
+        bio: 'Pelatih olahraga yang membawa siswa meraih prestasi di berbagai turnamen olahraga.',
+        achievements: ['Pelatih Futsal Bersertifikat Lisensi C', 'Wasit Atletik Tingkat Kabupaten', 'Guru Olahraga Berprestasi 2023', 'Sertifikasi Pendidik Profesional'],
+        contact: { email: 'ahmad.hidayat@sdn2kepuk.sch.id', phone: '-' }
     },
-    6: { 
-        name: 'Dewi Lestari', 
-        position: 'Staf Tata Usaha', 
-        education: 'SMK Administrasi Perkantoran', 
-        experience: '7 Tahun', 
-        bio: 'Mengelola administrasi sekolah dengan profesional, teliti, dan ramah dalam melayani.', 
-        achievements: ['Pelatihan Administrasi Sekolah Tingkat Provinsi', 'Sertifikasi Komputer Perkantoran', 'Workshop Pelayanan Prima', 'Pelatihan Sistem Informasi Manajemen Sekolah'], 
-        contact: { email: 'dewi.lestari@sdn2kepuk.sch.id', phone: '-' } 
+    6: {
+        name: 'Dewi Lestari',
+        position: 'Staf Tata Usaha',
+        education: 'SMK Administrasi Perkantoran',
+        experience: '7 Tahun',
+        bio: 'Mengelola administrasi sekolah dengan profesional, teliti, dan ramah dalam melayani.',
+        achievements: ['Pelatihan Administrasi Sekolah Tingkat Provinsi', 'Sertifikasi Komputer Perkantoran', 'Workshop Pelayanan Prima', 'Pelatihan Sistem Informasi Manajemen Sekolah'],
+        contact: { email: 'dewi.lestari@sdn2kepuk.sch.id', phone: '-' }
     },
-    7: { 
-        name: 'Nur Aini, S.Pd', 
-        position: 'Guru Kelas 3A', 
-        education: 'S1 PGSD - UNNES', 
-        experience: '9 Tahun', 
-        bio: 'Guru kelas yang berdedikasi dalam menciptakan suasana belajar yang aktif, kreatif, dan menyenangkan bagi siswa kelas 3.', 
-        achievements: ['Guru Teladan Tingkat Kecamatan 2023', 'Pelatihan Kurikulum Merdeka Belajar', 'Sertifikasi Pendidik Profesional', 'Workshop Pembelajaran Berbasis Karakter'], 
-        contact: { email: 'nur.aini@sdn2kepuk.sch.id', phone: '-' } 
+    7: {
+        name: 'Nur Aini, S.Pd',
+        position: 'Guru Kelas 3A',
+        education: 'S1 PGSD - UNNES',
+        experience: '9 Tahun',
+        bio: 'Guru kelas yang berdedikasi dalam menciptakan suasana belajar yang aktif, kreatif, dan menyenangkan bagi siswa kelas 3.',
+        achievements: ['Guru Teladan Tingkat Kecamatan 2023', 'Pelatihan Kurikulum Merdeka Belajar', 'Sertifikasi Pendidik Profesional', 'Workshop Pembelajaran Berbasis Karakter'],
+        contact: { email: 'nur.aini@sdn2kepuk.sch.id', phone: '-' }
     }
 };
 
+function resolveCmsImagePath(path) {
+    if (!path) return '';
+    const normalized = String(path).replace(/\\/g, '/');
+    if (normalized.startsWith('http://') || normalized.startsWith('https://')) return normalized;
+
+    const mediaBase = (window.cmsMediaBaseUrl || '').replace(/\/$/, '');
+    const storageBase = (window.cmsStorageBaseUrl || '/storage').replace(/\/$/, '');
+    if (normalized.startsWith('/storage/settings/')) {
+        return mediaBase ? `${mediaBase}/${normalized.replace(/^\/storage\//, '')}` : `${storageBase.replace(/\/storage$/, '')}${normalized}`;
+    }
+    if (normalized.startsWith('/')) return normalized;
+    if (normalized.startsWith('settings/')) return mediaBase ? `${mediaBase}/${normalized}` : `${storageBase}/${normalized}`;
+    if (normalized.startsWith('storage/settings/')) return mediaBase ? `${mediaBase}/${normalized.replace(/^storage\//, '')}` : `${storageBase.replace(/\/storage$/, '')}/${normalized}`;
+    if (normalized.startsWith('public/settings/')) return mediaBase ? `${mediaBase}/${normalized.replace(/^public\//, '')}` : `${storageBase}/${normalized.replace(/^public\//, '')}`;
+    return normalized;
+}
+
+function normalizeTeacherData(items) {
+    const normalized = {};
+    items.forEach((item, idx) => {
+        const id = idx + 1;
+        const achievementsRaw = item.achievements || '';
+        const achievements = Array.isArray(achievementsRaw)
+            ? achievementsRaw
+            : String(achievementsRaw).split(';').map(s => s.trim()).filter(Boolean);
+
+        normalized[id] = {
+            name: item.name || '-',
+            position: item.position || '-',
+            education: item.education || '-',
+            experience: item.experience || '-',
+            bio: item.bio || '-',
+            achievements: achievements.length ? achievements : ['-'],
+            contact: {
+                email: item.email || '-',
+                phone: item.phone || '-',
+            },
+            category: item.category || 'guru',
+            photo_path: item.photo_path || '',
+        };
+    });
+
+    return normalized;
+}
+
+function renderTeachersFromCms(items) {
+    const grid = document.getElementById('teachersGrid');
+    if (!grid || !Array.isArray(items) || !items.length) return;
+
+    teacherData = normalizeTeacherData(items);
+    grid.innerHTML = items.map((item, idx) => {
+        const id = idx + 1;
+        const name = item.name || '-';
+        const position = item.position || '-';
+        const category = item.category || 'guru';
+        const image = resolveCmsImagePath(item.photo_path || '');
+        const alt = name;
+
+        return `
+            <div class="teacher-card teacher-card-item rounded-2xl shadow-lg p-8 reveal" data-category="${category}" data-id="${id}" onclick="openModal(${id})">
+                <div class="teacher-photo-wrapper"><div class="teacher-photo">${image ? `<img src="${image}" alt="${alt}" style="width:100%;height:100%;object-fit:cover;object-position:center center;">` : `<span>${name.charAt(0)}</span>`}</div></div>
+                <div class="text-center"><h3 class="text-xl font-bold text-gray-900 mb-1">${name}</h3><p class="text-blue-600 font-semibold">${position}</p></div>
+            </div>
+        `;
+    }).join('');
+    observeNewRevealElements(grid);
+
+    const filterWrap = document.getElementById('teacherFilterWrap');
+    if (filterWrap) {
+        const categories = [...new Set(items.map(item => item.category || 'guru'))];
+        const categoryLabel = {
+            kepala: 'Kepala Sekolah',
+            guru: 'Guru Kelas',
+            mapel: 'Guru Mapel',
+        };
+
+        filterWrap.innerHTML = `<button class="filter-btn active px-6 py-3 bg-white rounded-xl shadow-md font-semibold" onclick="filterTeachers(event,'all')">Semua Tim</button>` +
+            categories.map(category => `<button class="filter-btn px-6 py-3 bg-white rounded-xl shadow-md font-semibold" onclick="filterTeachers(event,'${category}')">${categoryLabel[category] || category}</button>`).join('');
+    }
+}
+
 function openModal(id) {
     const t = teacherData[id];
+    if (!t) return;
     document.getElementById('modalName').textContent = t.name;
     document.getElementById('modalContent').innerHTML = `
         <div class="text-center mb-6">
@@ -250,7 +337,7 @@ function handleModalClick(event) {
 // =====================
 // GALLERY DATA & FILTER
 // =====================
-const galleryData = [
+let galleryData = [
     { img: 'g1.webp', title: 'Pemberian Hadiah Siswa Berprestasi', description: 'Guru memberikan penghargaan kepada siswa berprestasi', category: 'kegiatan' },
     { img: 'g2.webp', title: 'Festival Tunas Bahasa Ibu', description: 'Siswa tampil dalam Festival Tunas Bahasa Ibu Kecamatan Bangsri 2024', category: 'prestasi' },
     { img: 'g3.webp', title: 'Juara Pramuka', description: 'Tim pramuka SDN 2 Kepuk meraih juara', category: 'prestasi' },
@@ -267,75 +354,66 @@ const galleryData = [
     { img: 'g14.webp', title: 'Sholat Berjamaah', description: 'Pembiasaan sholat berjamaah di kelas', category: 'pembelajaran' }
 ];
 
+function renderGalleryFromCms(items) {
+    const grid = document.getElementById('galleryGrid');
+    if (!grid || !Array.isArray(items) || !items.length) return;
+
+    galleryData = items.map((item) => ({
+        img: resolveCmsImagePath(item.image_path || ''),
+        title: item.title || '-',
+        description: item.description || '-',
+        category: item.category || 'kegiatan',
+    }));
+
+    grid.innerHTML = galleryData.map((item, index) => {
+        return `<div class="gallery-item-sm reveal" data-category="${item.category}" onclick="openLightbox(${index})"><img src="${item.img}" alt="${item.title}"></div>`;
+    }).join('');
+    observeNewRevealElements(grid);
+
+    const categoryWrap = document.querySelector('#galeri .flex.flex-wrap.justify-center.gap-2');
+    if (categoryWrap) {
+        const categories = [...new Set(galleryData.map(item => item.category))];
+        categoryWrap.innerHTML = `<button onclick="filterGallery(event,'all')" class="gallery-category-btn active px-4 py-1.5 text-sm rounded-full border border-gray-300 bg-white">Semua</button>` +
+            categories.map(category => `<button onclick="filterGallery(event,'${category}')" class="gallery-category-btn px-4 py-1.5 text-sm rounded-full border border-gray-300 bg-white">${category}</button>`).join('');
+    }
+}
+
 let currentImageIndex = 0;
 
 // =====================
 // GALLERY SHOW MORE
 // =====================
-const GALLERY_COLS = 5; // items per row
-const GALLERY_VISIBLE_ROWS = 2;
-let galleryExpanded = false;
 let currentGalleryCategory = 'all';
 
 function applyGalleryLimit() {
     const allItems = document.querySelectorAll('.gallery-item-sm');
-    const visibleItems = Array.from(allItems).filter(item =>
-        currentGalleryCategory === 'all' || item.dataset.category === currentGalleryCategory
-    );
-    const limit = galleryExpanded ? Infinity : GALLERY_COLS * GALLERY_VISIBLE_ROWS;
-
-    let visibleCount = 0;
     allItems.forEach(item => {
         const matchesFilter = currentGalleryCategory === 'all' || item.dataset.category === currentGalleryCategory;
         if (matchesFilter) {
-            visibleCount++;
-            if (visibleCount <= limit) {
-                item.style.display = 'block';
-                item.style.opacity = '1';
-                item.style.transform = 'translateY(0)';
-            } else {
-                item.style.opacity = '0';
-                item.style.transform = 'translateY(20px)';
-                setTimeout(() => { item.style.display = 'none'; }, 200);
-            }
+            item.style.display = 'block';
+            item.style.opacity = '1';
+            item.style.transform = 'translateY(0)';
         } else {
             item.style.opacity = '0';
             item.style.transform = 'translateY(20px)';
             setTimeout(() => { item.style.display = 'none'; }, 200);
         }
     });
-
-    // Show/hide toggle button
-    const wrap = document.getElementById('galleryToggleWrap');
-    const btn = document.getElementById('galleryToggleBtn');
-    const text = document.getElementById('galleryToggleText');
-    const icon = document.getElementById('galleryToggleIcon');
-    if (wrap) {
-        wrap.style.display = visibleItems.length > limit ? 'block' : (galleryExpanded && visibleItems.length > GALLERY_COLS * GALLERY_VISIBLE_ROWS ? 'block' : 'none');
-        if (visibleItems.length <= GALLERY_COLS * GALLERY_VISIBLE_ROWS) {
-            wrap.style.display = 'none';
-        } else {
-            wrap.style.display = 'block';
-        }
-    }
-    if (text) text.textContent = galleryExpanded ? 'Tampilkan Lebih Sedikit' : 'Lihat Selengkapnya (' + (visibleItems.length - limit) + ' foto lainnya)';
-    if (icon) icon.style.transform = galleryExpanded ? 'rotate(180deg)' : 'rotate(0deg)';
 }
 
 function toggleGallery() {
-    galleryExpanded = !galleryExpanded;
+    // No-op: gallery limit is disabled, all photos are shown.
     applyGalleryLimit();
 }
 
 function filterGallery(event, category) {
     currentGalleryCategory = category;
-    galleryExpanded = false;
     const items = document.querySelectorAll('.gallery-item, .gallery-item-sm');
     const btns = document.querySelectorAll('.gallery-category-btn');
-    
+
     btns.forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
-    
+
     applyGalleryLimit();
 }
 
@@ -388,7 +466,7 @@ document.addEventListener('keydown', function(e) {
 // =====================
 // BERITA MODAL
 // =====================
-const beritaData = [
+let beritaData = [
     {
         img: 'b1.jpg',
         tag: 'Prestasi',
@@ -446,6 +524,41 @@ const beritaData = [
         `
     }
 ];
+
+function renderNewsFromCms(items) {
+    const track = document.getElementById('beritaTrack');
+    if (!track || !Array.isArray(items) || !items.length) return;
+
+    beritaData = items.map((item) => ({
+        img: resolveCmsImagePath(item.image_path || ''),
+        tag: item.tag || 'Berita',
+        tagClass: 'text-blue-600 bg-blue-100',
+        date: item.date || '-',
+        title: item.title || '-',
+        body: item.body || item.summary || '-',
+        summary: item.summary || '-',
+    }));
+
+    track.innerHTML = beritaData.map((item, index) => `
+        <article class="bg-white rounded-xl shadow-sm border overflow-hidden card-hover flex flex-col cursor-pointer flex-shrink-0" style="width: calc((100% - 3*1.25rem) / 4)" onclick="openBerita(${index})">
+            <img src="${item.img}" alt="${item.title}" class="w-full h-56 object-cover">
+            <div class="p-4 flex flex-col flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">${item.tag}</span>
+                    <span class="text-xs text-gray-400">${item.date}</span>
+                </div>
+                <h4 class="text-sm font-bold text-gray-900 mb-1.5 leading-snug line-clamp-2">${item.title}</h4>
+                <p class="text-xs text-gray-500 leading-relaxed flex-1 line-clamp-2">${item.summary}</p>
+                <button onclick="event.stopPropagation();openBerita(${index})" class="text-xs text-blue-600 font-semibold mt-2 inline-flex items-center hover:text-blue-800 transition">Baca Selengkapnya <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+            </div>
+        </article>
+    `).join('');
+
+    const dotsWrap = document.querySelector('#berita .flex.justify-center.gap-2.mt-6');
+    if (dotsWrap) {
+        dotsWrap.innerHTML = beritaData.map((_, index) => `<button class="berita-dot w-3 h-3 rounded-full ${index === 0 ? 'bg-blue-600' : 'bg-gray-300'} transition-all" onclick="goToBeritaSlide(${index})"></button>`).join('');
+    }
+}
 
 function openBerita(index) {
     const b = beritaData[index];
@@ -564,5 +677,19 @@ function goToBeritaSlide(index) {
     updateBeritaSlider();
 }
 
-window.addEventListener('DOMContentLoaded', updateBeritaSlider);
+window.addEventListener('DOMContentLoaded', function() {
+    if (Array.isArray(window.cmsTeachersData) && window.cmsTeachersData.length) {
+        renderTeachersFromCms(window.cmsTeachersData);
+    }
+
+    if (Array.isArray(window.cmsGalleryData) && window.cmsGalleryData.length) {
+        renderGalleryFromCms(window.cmsGalleryData);
+    }
+
+    if (Array.isArray(window.cmsNewsData) && window.cmsNewsData.length) {
+        renderNewsFromCms(window.cmsNewsData);
+    }
+
+    updateBeritaSlider();
+});
 window.addEventListener('resize', updateBeritaSlider);

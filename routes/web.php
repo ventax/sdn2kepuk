@@ -1,10 +1,23 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 
 Route::get('/', function () {
     return view('welcome');
 });
+
+Route::get('media/{path}', function (string $path) {
+    if (str_contains($path, '..')) {
+        abort(404);
+    }
+
+    if (!Storage::disk('public')->exists($path)) {
+        abort(404);
+    }
+
+    return response()->file(Storage::disk('public')->path($path));
+})->where('path', '.*')->name('media.public');
 
 // Route dummy agar error route [login] not defined hilang
 Route::get('login', function () {
@@ -26,4 +39,6 @@ Route::prefix('admin')->middleware('auth')->group(function () {
     ]);
     Route::get('settings', [App\Http\Controllers\Admin\SettingController::class, 'edit'])->name('admin.settings.edit');
     Route::put('settings', [App\Http\Controllers\Admin\SettingController::class, 'update'])->name('admin.settings.update');
+    Route::get('home-content', [App\Http\Controllers\Admin\HomeContentController::class, 'edit'])->name('admin.home-content.edit');
+    Route::put('home-content', [App\Http\Controllers\Admin\HomeContentController::class, 'update'])->name('admin.home-content.update');
 });

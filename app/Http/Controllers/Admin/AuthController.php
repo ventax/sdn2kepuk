@@ -15,11 +15,14 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $credentials = $request->only('email', 'password');
+        $credentials = $request->validate([
+            'email' => ['required', 'email'],
+            'password' => ['required', 'string'],
+        ]);
 
         if (Auth::attempt($credentials)) {
-            // Jika berhasil login, redirect ke dashboard admin
-            return redirect()->route('admin.dashboard');
+            $request->session()->regenerate();
+            return redirect()->intended(route('admin.dashboard'));
         }
 
         // Jika gagal, kembali ke form login dengan pesan error

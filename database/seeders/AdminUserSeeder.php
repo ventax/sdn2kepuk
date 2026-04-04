@@ -1,9 +1,24 @@
 <?php
 
-use App\Models\User;
+namespace Database\Seeders;
 
-User::create([
-    'name' => 'Admin SDN 2 Kepuk',
-    'email' => 'sdn2kepukbangsri@gmail.com',
-    'password' => bcrypt('sdnkepuk123'),
-]);
+use App\Models\User;
+use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Hash;
+
+class AdminUserSeeder extends Seeder
+{
+    /**
+     * Seed a default admin user.
+     */
+    public function run(): void
+    {
+        User::updateOrCreate(
+            ['email' => 'sdn2kepukbangsri@gmail.com'],
+            [
+                'name' => 'Admin SDN 2 Kepuk',
+                'password' => Hash::make('sdnkepuk123'),
+            ]
+        );
+    }
+}

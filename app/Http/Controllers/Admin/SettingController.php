@@ -30,6 +30,7 @@ class SettingController extends Controller
         $rules['stat_siswa'] = 'nullable|string';
         $rules['stat_guru'] = 'nullable|string';
         $rules['stat_pengalaman'] = 'nullable|string';
+        $rules['stat_akreditasi'] = 'nullable|string';
 
         // Visi, misi, nilai utama
         $rules['visi'] = 'nullable|string';
