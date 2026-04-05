@@ -25,6 +25,11 @@ class HomeContentController extends Controller
             ['title' => 'Kegiatan Sekolah Tahun Ajaran Baru', 'tag' => 'Kegiatan', 'date' => 'Juli 2024', 'summary' => 'Rangkaian kegiatan awal tahun ajaran.', 'body' => 'Detail kegiatan ditulis di sini.', 'image_path' => 'b2.jpg'],
         ]);
 
+        $achievements = $this->decodeSetting('achievements_data', [
+            ['title' => 'Juara 2 Olimpiade Sains Nasional Tingkat Kecamatan', 'level' => 'Akademik', 'date' => 'Februari 2024', 'description' => 'Siswa SDN 2 Kepuk meraih medali perak pada ajang OSN tingkat kecamatan.', 'image_path' => 'b1.jpg'],
+            ['title' => 'Juara 3 Pesta Siaga Kecamatan Bangsri', 'level' => 'Pramuka', 'date' => 'Maret 2024', 'description' => 'Kontingen siaga tampil kompak dan berhasil membawa pulang juara 3.', 'image_path' => 'b3.jpg'],
+        ]);
+
         $contact = $this->decodeSetting('contact_data', [
             'address' => 'Jl. Raya Kepuk - Plajan, Jepara',
             'email' => 'sdn2kepukbangsri@gmail.com',
@@ -35,6 +40,9 @@ class HomeContentController extends Controller
             'ppdb_whatsapp_2' => '6282131607875',
             'ppdb_label_2' => 'Pak Fina',
             'tiktok_url' => 'https://www.tiktok.com/@sdn2kepuk',
+            'instagram_url' => '',
+            'facebook_url' => '',
+            'youtube_url' => '',
         ]);
 
         $ppdb = $this->decodeSetting('ppdb_data', [
@@ -47,7 +55,7 @@ class HomeContentController extends Controller
             'flyer_image' => '',
         ]);
 
-        return view('admin.home-content.edit', compact('teachers', 'gallery', 'news', 'contact', 'ppdb'));
+        return view('admin.home-content.edit', compact('teachers', 'gallery', 'news', 'achievements', 'contact', 'ppdb'));
     }
 
     public function update(Request $request)
@@ -82,6 +90,14 @@ class HomeContentController extends Controller
             'news.*.image_path' => ['nullable', 'string'],
             'news_images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
 
+            'achievements' => ['nullable', 'array'],
+            'achievements.*.title' => ['nullable', 'string'],
+            'achievements.*.level' => ['nullable', 'string'],
+            'achievements.*.date' => ['nullable', 'string'],
+            'achievements.*.description' => ['nullable', 'string'],
+            'achievements.*.image_path' => ['nullable', 'string'],
+            'achievements_images.*' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp'],
+
             'contact.address' => ['nullable', 'string'],
             'contact.email' => ['nullable', 'string'],
             'contact.hours' => ['nullable', 'string'],
@@ -91,6 +107,9 @@ class HomeContentController extends Controller
             'contact.ppdb_whatsapp_2' => ['nullable', 'string'],
             'contact.ppdb_label_2' => ['nullable', 'string'],
             'contact.tiktok_url' => ['nullable', 'string'],
+            'contact.instagram_url' => ['nullable', 'string'],
+            'contact.facebook_url' => ['nullable', 'string'],
+            'contact.youtube_url' => ['nullable', 'string'],
 
             'ppdb.badge_text' => ['nullable', 'string'],
             'ppdb.title' => ['nullable', 'string'],
@@ -146,9 +165,24 @@ class HomeContentController extends Controller
             $news[] = $item;
         }
 
+        $achievementsInput = $data['achievements'] ?? [];
+        $achievements = [];
+        foreach ($achievementsInput as $index => $item) {
+            $item['title'] = trim((string) ($item['title'] ?? ''));
+            if ($item['title'] === '') {
+                continue;
+            }
+
+            if ($request->hasFile("achievements_images.$index")) {
+                $item['image_path'] = $request->file("achievements_images.$index")->store('settings', 'public');
+            }
+            $achievements[] = $item;
+        }
+
         Setting::updateOrCreate(['key' => 'teachers_data'], ['value' => json_encode($teachers)]);
         Setting::updateOrCreate(['key' => 'gallery_data'], ['value' => json_encode($gallery)]);
         Setting::updateOrCreate(['key' => 'news_data'], ['value' => json_encode($news)]);
+        Setting::updateOrCreate(['key' => 'achievements_data'], ['value' => json_encode($achievements)]);
         Setting::updateOrCreate(['key' => 'contact_data'], ['value' => json_encode($data['contact'] ?? [])]);
 
         $ppdb = $data['ppdb'] ?? [];

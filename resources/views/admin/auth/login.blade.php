@@ -21,7 +21,7 @@
         .login-brand {
             background:
                 radial-gradient(circle at 85% 0%, rgba(255, 255, 255, .12), transparent 35%),
-                linear-gradient(155deg, #10253f 0%, #0f6f67 58%, #0aa27d 100%);
+                linear-gradient(155deg, #0f1f3d 0%, #1d4ed8 58%, #2563eb 100%);
             color: #fff;
             padding: 2rem;
         }
@@ -51,12 +51,12 @@
         }
 
         .form-control:focus {
-            border-color: #14a38b;
-            box-shadow: 0 0 0 .2rem rgba(20, 163, 139, .12);
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 .2rem rgba(59, 130, 246, .14);
         }
 
         .btn-login {
-            background: linear-gradient(135deg, #0f9f87, #0b6a5a);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             border: 0;
             font-weight: 700;
             letter-spacing: .01em;
@@ -65,7 +65,7 @@
         }
 
         .btn-login:hover {
-            background: linear-gradient(135deg, #0b8c77, #09584c);
+            background: linear-gradient(135deg, #1d4ed8, #1e40af);
         }
 
         .login-note {

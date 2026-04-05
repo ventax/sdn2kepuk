@@ -16,7 +16,7 @@
         </div>
 
         @if (session('success'))
-            <div class="alert alert-success rounded-3">{{ session('success') }}</div>
+            <div class="alert alert-primary rounded-3">{{ session('success') }}</div>
         @endif
 
         <div class="table-responsive">

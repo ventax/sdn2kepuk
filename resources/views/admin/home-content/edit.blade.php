@@ -1,12 +1,12 @@
 @extends('admin.layouts.app')
 
-@section('title', 'CMS Homepage')
-@section('page_title', 'CMS Homepage Lengkap')
+@section('title', 'Admin SD Negeri 2 Kepuk')
+@section('page_title', 'Admin SD Negeri 2 Kepuk')
 
 @section('content')
     <style>
         .cms-hero {
-            background: linear-gradient(135deg, #0f9f87, #1d4ed8);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
             color: #fff;
             border-radius: .85rem;
             padding: 1rem 1.1rem;
@@ -25,7 +25,7 @@
         .cms-nav .nav-link.active {
             color: #fff;
             border-color: transparent;
-            background: linear-gradient(135deg, #0f9f87, #0b6a5a);
+            background: linear-gradient(135deg, #2563eb, #1e40af);
         }
 
         .cms-item {
@@ -41,7 +41,7 @@
             <h5 class="mb-1 fw-bold">Kelola Semua Konten Website</h5>
             <small class="opacity-75">Pilih tab sesuai bagian website yang ingin diedit.</small>
         </div>
-        <span class="badge text-bg-light">CMS Homepage</span>
+        <span class="badge text-bg-light">Admin SD Negeri 2 Kepuk</span>
     </div>
 
     <form action="{{ route('admin.home-content.update') }}" method="POST" enctype="multipart/form-data"
@@ -63,7 +63,7 @@
             Field lain boleh dikosongkan.
         </div>
 
-        <ul class="nav nav-pills cms-nav gap-2 mb-4" role="tablist">
+        <ul class="nav nav-pills cms-nav gap-2 mb-4 d-none" role="tablist">
             <li class="nav-item" role="presentation"><button class="nav-link active" data-bs-toggle="pill"
                     data-bs-target="#tabTeachers" type="button">1. Guru</button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill"
@@ -71,9 +71,11 @@
             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill"
                     data-bs-target="#tabNews" type="button">3. Berita</button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill"
-                    data-bs-target="#tabPpdb" type="button">4. PPDB</button></li>
+                    data-bs-target="#tabAchievements" type="button">4. Prestasi</button></li>
             <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill"
-                    data-bs-target="#tabContact" type="button">5. Kontak</button></li>
+                    data-bs-target="#tabPpdb" type="button">5. PPDB</button></li>
+            <li class="nav-item" role="presentation"><button class="nav-link" data-bs-toggle="pill"
+                    data-bs-target="#tabContact" type="button">6. Kontak</button></li>
         </ul>
 
         <div class="tab-content">
@@ -216,6 +218,48 @@
                 <button type="button" class="btn btn-light mt-3" onclick="addNewsRow()">+ Tambah Berita</button>
             </div>
 
+            <div class="tab-pane fade" id="tabAchievements">
+                <p class="text-secondary small mb-3">Isi data prestasi siswa/sekolah. Tampil di section Prestasi website.
+                </p>
+                <div id="achievementsRepeater" class="row g-3">
+                    @foreach ($achievements as $index => $item)
+                        <div class="col-12 achievement-item-row cms-item">
+                            <input type="hidden" name="achievements[{{ $index }}][image_path]"
+                                value="{{ $item['image_path'] ?? '' }}">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <strong>Prestasi {{ $index + 1 }}</strong>
+                                <button type="button" class="btn btn-sm btn-outline-danger"
+                                    onclick="removeItem(this)">Hapus</button>
+                            </div>
+                            <div class="row g-2">
+                                <div class="col-md-6"><input class="form-control"
+                                        name="achievements[{{ $index }}][title]"
+                                        value="{{ $item['title'] ?? '' }}" placeholder="Judul prestasi"></div>
+                                <div class="col-md-3"><input class="form-control"
+                                        name="achievements[{{ $index }}][level]"
+                                        value="{{ $item['level'] ?? '' }}" placeholder="Kategori (Akademik/Olahraga)">
+                                </div>
+                                <div class="col-md-3"><input class="form-control"
+                                        name="achievements[{{ $index }}][date]" value="{{ $item['date'] ?? '' }}"
+                                        placeholder="Tanggal/Tahun"></div>
+                                <div class="col-md-12">
+                                    <textarea class="form-control" rows="3" name="achievements[{{ $index }}][description]"
+                                        placeholder="Deskripsi prestasi">{{ $item['description'] ?? '' }}</textarea>
+                                </div>
+                                <div class="col-md-12"><input type="file" class="form-control"
+                                        name="achievements_images[{{ $index }}]" accept="image/*"></div>
+                            </div>
+                            @if (!empty($item['image_path']))
+                                <small class="text-secondary d-block mt-2">Gambar saat ini:
+                                    {{ $item['image_path'] }}</small>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+                <button type="button" class="btn btn-light mt-3" onclick="addAchievementRow()">+ Tambah
+                    Prestasi</button>
+            </div>
+
             <div class="tab-pane fade" id="tabPpdb">
                 <p class="text-secondary small mb-3">Atur tampilan section PPDB di halaman utama.</p>
                 <div class="row g-3">
@@ -270,6 +314,12 @@
                             name="contact[hours]" value="{{ $contact['hours'] ?? '' }}"></div>
                     <div class="col-md-6"><label class="form-label">TikTok URL</label><input class="form-control"
                             name="contact[tiktok_url]" value="{{ $contact['tiktok_url'] ?? '' }}"></div>
+                    <div class="col-md-6"><label class="form-label">Instagram URL</label><input class="form-control"
+                            name="contact[instagram_url]" value="{{ $contact['instagram_url'] ?? '' }}"></div>
+                    <div class="col-md-6"><label class="form-label">Facebook URL</label><input class="form-control"
+                            name="contact[facebook_url]" value="{{ $contact['facebook_url'] ?? '' }}"></div>
+                    <div class="col-md-6"><label class="form-label">YouTube URL</label><input class="form-control"
+                            name="contact[youtube_url]" value="{{ $contact['youtube_url'] ?? '' }}"></div>
                     <div class="col-md-6"><label class="form-label">WA PPDB 1 (format 628xxx)</label><input
                             class="form-control" name="contact[ppdb_whatsapp_1]"
                             value="{{ $contact['ppdb_whatsapp_1'] ?? '' }}"></div>
@@ -298,9 +348,44 @@
         let teacherIndex = {{ count($teachers) }};
         let galleryIndex = {{ count($gallery) }};
         let newsIndex = {{ count($news) }};
+        let achievementIndex = {{ count($achievements) }};
+
+        const tabMap = {
+            teachers: '#tabTeachers',
+            gallery: '#tabGallery',
+            news: '#tabNews',
+            achievements: '#tabAchievements',
+            ppdb: '#tabPpdb',
+            contact: '#tabContact'
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const tabFromUrl = (urlParams.get('tab') || '').toLowerCase();
+        const targetSelector = tabMap[tabFromUrl];
+
+        if (targetSelector) {
+            const triggerEl = document.querySelector(`.cms-nav [data-bs-target="${targetSelector}"]`);
+            if (triggerEl) {
+                bootstrap.Tab.getOrCreateInstance(triggerEl).show();
+            }
+        }
+
+        document.querySelectorAll('.cms-nav [data-bs-toggle="pill"]').forEach((triggerEl) => {
+            triggerEl.addEventListener('shown.bs.tab', (event) => {
+                const target = event.target.getAttribute('data-bs-target');
+                const activeTabKey = Object.keys(tabMap).find((key) => tabMap[key] === target);
+                if (!activeTabKey) {
+                    return;
+                }
+
+                const nextUrl = new URL(window.location.href);
+                nextUrl.searchParams.set('tab', activeTabKey);
+                window.history.replaceState({}, '', nextUrl.toString());
+            });
+        });
 
         function removeItem(button) {
-            const item = button.closest('.teacher-item, .gallery-item-row, .news-item-row');
+            const item = button.closest('.teacher-item, .gallery-item-row, .news-item-row, .achievement-item-row');
             if (item) item.remove();
         }
 
@@ -377,6 +462,27 @@
             </div>
         `);
             newsIndex++;
+        }
+
+        function addAchievementRow() {
+            const wrap = document.getElementById('achievementsRepeater');
+            wrap.insertAdjacentHTML('beforeend', `
+            <div class="col-12 achievement-item-row cms-item">
+                <input type="hidden" name="achievements[${achievementIndex}][image_path]" value="">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <strong>Prestasi ${achievementIndex + 1}</strong>
+                    <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(this)">Hapus</button>
+                </div>
+                <div class="row g-2">
+                    <div class="col-md-6"><input class="form-control" name="achievements[${achievementIndex}][title]" placeholder="Judul prestasi"></div>
+                    <div class="col-md-3"><input class="form-control" name="achievements[${achievementIndex}][level]" placeholder="Kategori (Akademik/Olahraga)"></div>
+                    <div class="col-md-3"><input class="form-control" name="achievements[${achievementIndex}][date]" placeholder="Tanggal/Tahun"></div>
+                    <div class="col-md-12"><textarea class="form-control" rows="3" name="achievements[${achievementIndex}][description]" placeholder="Deskripsi prestasi"></textarea></div>
+                    <div class="col-md-12"><input type="file" class="form-control" name="achievements_images[${achievementIndex}]" accept="image/*"></div>
+                </div>
+            </div>
+        `);
+            achievementIndex++;
         }
     </script>
 @endpush

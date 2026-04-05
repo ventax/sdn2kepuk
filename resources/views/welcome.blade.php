@@ -31,12 +31,14 @@
         $teachersCms = json_decode(SettingHelper::get('teachers_data', '[]'), true);
         $galleryCms = json_decode(SettingHelper::get('gallery_data', '[]'), true);
         $newsCms = json_decode(SettingHelper::get('news_data', '[]'), true);
+        $achievementsCms = json_decode(SettingHelper::get('achievements_data', '[]'), true);
         $contactCms = json_decode(SettingHelper::get('contact_data', '{}'), true);
         $ppdbCms = json_decode(SettingHelper::get('ppdb_data', '{}'), true);
 
         $teachersCms = is_array($teachersCms) ? $teachersCms : [];
         $galleryCms = is_array($galleryCms) ? $galleryCms : [];
         $newsCms = is_array($newsCms) ? $newsCms : [];
+        $achievementsCms = is_array($achievementsCms) ? $achievementsCms : [];
         $contactCms = is_array($contactCms) ? $contactCms : [];
         $ppdbCms = is_array($ppdbCms) ? $ppdbCms : [];
 
@@ -50,7 +52,10 @@
         $ppdbWa2 = $contactCms['ppdb_whatsapp_2'] ?? '6282131607875';
         $ppdbLabel1 = $contactCms['ppdb_label_1'] ?? 'Bu Zuli';
         $ppdbLabel2 = $contactCms['ppdb_label_2'] ?? 'Pak Fina';
-        $tiktokUrl = $contactCms['tiktok_url'] ?? 'https://www.tiktok.com/@sdn2kepuk';
+        $tiktokUrl = trim((string) ($contactCms['tiktok_url'] ?? ''));
+        $instagramUrl = trim((string) ($contactCms['instagram_url'] ?? ''));
+        $facebookUrl = trim((string) ($contactCms['facebook_url'] ?? ''));
+        $youtubeUrl = trim((string) ($contactCms['youtube_url'] ?? ''));
 
         $baseUrl = rtrim(request()->getBaseUrl(), '/');
         $storageBaseUrl = ($baseUrl !== '' ? $baseUrl : '') . '/storage';
@@ -77,6 +82,11 @@
 
             if (str_starts_with($normalized, 'public/')) {
                 return $mediaBaseUrl . '/' . ltrim(str_replace('public/', '', $normalized), '/');
+            }
+
+            // For legacy/default bare filenames (e.g. b1.jpg), use public asset path.
+            if (!str_contains($normalized, '/')) {
+                return asset($normalized);
             }
 
             return $mediaBaseUrl . '/' . ltrim($normalized, '/');
@@ -122,6 +132,31 @@
                 fn($value) => $value !== '',
             ),
         );
+
+        $defaultAchievements = [
+            [
+                'title' => 'Juara 2 Olimpiade Sains Nasional Tingkat Kecamatan',
+                'level' => 'Akademik',
+                'date' => 'Februari 2024',
+                'description' => 'Siswa SDN 2 Kepuk meraih medali perak pada ajang OSN tingkat kecamatan.',
+                'image_path' => 'b1.jpg',
+            ],
+            [
+                'title' => 'Juara 3 Pesta Siaga Kecamatan Bangsri',
+                'level' => 'Pramuka',
+                'date' => 'Maret 2024',
+                'description' => 'Kontingen siaga tampil kompak dan berhasil membawa pulang juara 3.',
+                'image_path' => 'b3.jpg',
+            ],
+            [
+                'title' => 'Juara Harapan 1 Festival Tunas Bahasa Ibu',
+                'level' => 'Seni Budaya',
+                'date' => 'Februari 2026',
+                'description' => 'Siswa SDN 2 Kepuk menunjukkan performa terbaik dan meraih juara harapan 1.',
+                'image_path' => 'b4.jpg',
+            ],
+        ];
+        $prestasiItems = count($achievementsCms) > 0 ? $achievementsCms : $defaultAchievements;
     @endphp
     <link rel="icon" type="image/jpeg"
         href="{{ $logoImage ? asset('storage/' . $logoImage) : asset('images/logo-sdn2-kepuk.jpeg') }}">
@@ -662,6 +697,42 @@
             display: inline-block;
             animation: tickerScroll 20s linear infinite;
         }
+
+        /* Mobile-first layout for Prestasi cards */
+        .prestasi-mobile-scroll {
+            display: flex;
+            gap: 1rem;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            padding: 0 .25rem .5rem;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .prestasi-mobile-scroll::-webkit-scrollbar {
+            height: 6px;
+        }
+
+        .prestasi-mobile-scroll::-webkit-scrollbar-thumb {
+            background: #93c5fd;
+            border-radius: 999px;
+        }
+
+        .prestasi-card-mobile {
+            min-width: 85%;
+            scroll-snap-align: start;
+        }
+
+        @media (min-width: 768px) {
+            .prestasi-mobile-only {
+                display: none;
+            }
+        }
+
+        @media (max-width: 767.98px) {
+            .prestasi-desktop-only {
+                display: none;
+            }
+        }
     </style>
 </head>
 
@@ -688,6 +759,8 @@
                         class="px-3 py-1.5 text-sm text-gray-600 hover:text-blue-600 font-medium transition rounded-lg hover:bg-blue-50">Profil</a>
                     <a href="#berita"
                         class="px-3 py-1.5 text-sm text-gray-600 hover:text-blue-600 font-medium transition rounded-lg hover:bg-blue-50">Berita</a>
+                    <a href="#prestasi"
+                        class="px-3 py-1.5 text-sm text-gray-600 hover:text-blue-600 font-medium transition rounded-lg hover:bg-blue-50">Prestasi</a>
                     <a href="#guru"
                         class="px-3 py-1.5 text-sm text-gray-600 hover:text-blue-600 font-medium transition rounded-lg hover:bg-blue-50">Tenaga
                         Pendidik</a>
@@ -717,6 +790,8 @@
                 <a href="#berita"
                     class="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded-lg font-medium">Berita &
                     Pengumuman</a>
+                <a href="#prestasi"
+                    class="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded-lg font-medium">Prestasi</a>
                 <a href="#guru"
                     class="block px-3 py-2 text-sm text-gray-700 hover:bg-blue-50 rounded-lg font-medium">Tenaga
                     Pendidik</a>
@@ -1238,6 +1313,75 @@
         </div>
     </div>
 
+    <!-- Prestasi -->
+    <section id="prestasi" class="py-16 md:py-20 bg-gradient-to-b from-blue-50 to-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-8 md:mb-12 reveal">
+                <h2 class="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-gray-900 mb-2">Prestasi Siswa &
+                    Sekolah</h2>
+                <p class="text-sm md:text-base text-gray-500 max-w-3xl mx-auto">Capaian membanggakan di bidang
+                    akademik,
+                    non-akademik, dan karakter.</p>
+            </div>
+
+            <div class="prestasi-mobile-only md:hidden -mx-4 px-4 mb-2 reveal">
+                <div class="prestasi-mobile-scroll">
+                    @foreach ($prestasiItems as $prestasi)
+                        @php
+                            $prestasiImage = $resolveCmsMediaUrl($prestasi['image_path'] ?? '');
+                        @endphp
+                        <article
+                            class="prestasi-card-mobile bg-white rounded-2xl border border-blue-100 shadow-sm hover:shadow-lg transition overflow-hidden flex flex-col">
+                            <div class="relative">
+                                <img src="{{ $prestasiImage !== '' ? $prestasiImage : 'b1.jpg' }}"
+                                    alt="{{ $prestasi['title'] ?? 'Prestasi' }}" class="w-full h-44 object-cover">
+                                <span
+                                    class="absolute left-3 top-3 text-[11px] font-semibold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full">
+                                    {{ $prestasi['level'] ?? 'Prestasi' }}
+                                </span>
+                            </div>
+                            <div class="p-4 flex flex-col flex-1">
+                                <p class="text-xs text-blue-700 font-semibold mb-1.5">{{ $prestasi['date'] ?? '' }}
+                                </p>
+                                <h3 class="text-sm font-bold text-gray-900 leading-snug mb-2 line-clamp-2">
+                                    {{ $prestasi['title'] ?? '' }}</h3>
+                                <p class="text-xs text-gray-600 leading-relaxed line-clamp-3">
+                                    {{ $prestasi['description'] ?? '' }}</p>
+                            </div>
+                        </article>
+                    @endforeach
+                </div>
+                <p class="text-[11px] text-gray-400 mt-2">Geser ke samping untuk melihat prestasi lainnya.</p>
+            </div>
+
+            <div class="prestasi-desktop-only hidden md:grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+                @foreach ($prestasiItems as $prestasi)
+                    @php
+                        $prestasiImage = $resolveCmsMediaUrl($prestasi['image_path'] ?? '');
+                    @endphp
+                    <article
+                        class="reveal bg-white rounded-2xl border border-blue-100 shadow-sm hover:shadow-lg transition overflow-hidden flex flex-col">
+                        <div class="relative">
+                            <img src="{{ $prestasiImage !== '' ? $prestasiImage : 'b1.jpg' }}"
+                                alt="{{ $prestasi['title'] ?? 'Prestasi' }}" class="w-full h-52 object-cover">
+                            <span
+                                class="absolute left-3 top-3 text-xs font-semibold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full">
+                                {{ $prestasi['level'] ?? 'Prestasi' }}
+                            </span>
+                        </div>
+                        <div class="p-5 flex flex-col flex-1">
+                            <p class="text-xs text-blue-700 font-semibold mb-2">{{ $prestasi['date'] ?? '' }}</p>
+                            <h3 class="text-base font-bold text-gray-900 leading-snug mb-2">
+                                {{ $prestasi['title'] ?? '' }}</h3>
+                            <p class="text-sm text-gray-600 leading-relaxed flex-1">
+                                {{ $prestasi['description'] ?? '' }}</p>
+                        </div>
+                    </article>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
     <!-- Lightbox -->
     <div id="lightbox" class="lightbox" onclick="handleLightboxClick(event)">
         <div class="lightbox-content">
@@ -1462,13 +1606,53 @@
                     <p class="text-gray-400 leading-relaxed mb-4">Lembaga pendidikan yang berkomitmen membentuk
                         generasi penerus bangsa yang cerdas, berkarakter, dan berakhlak mulia.</p>
                     <div class="flex space-x-3">
-                        <a href="{{ $tiktokUrl }}" target="_blank" rel="noopener noreferrer"
-                            class="w-10 h-10 bg-gray-800 border border-gray-600 rounded-full flex items-center justify-center hover:bg-black transition"
-                            title="TikTok SDN 2 Kepuk">
+                        <a href="{{ $tiktokUrl !== '' ? $tiktokUrl : 'javascript:void(0)' }}"
+                            @if ($tiktokUrl !== '') target="_blank" rel="noopener noreferrer" @endif
+                            class="w-10 h-10 bg-gray-800 border border-gray-600 rounded-full flex items-center justify-center transition {{ $tiktokUrl !== '' ? 'hover:bg-black' : 'opacity-60 cursor-not-allowed' }}"
+                            title="TikTok SDN 2 Kepuk" aria-label="TikTok SDN 2 Kepuk"
+                            @if ($tiktokUrl === '') aria-disabled="true" @endif>
                             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"
                                 class="w-5 h-5">
                                 <path
                                     d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.33 6.33 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.75a4.85 4.85 0 0 1-1.01-.06z" />
+                            </svg>
+                        </a>
+
+                        <a href="{{ $instagramUrl !== '' ? $instagramUrl : 'javascript:void(0)' }}"
+                            @if ($instagramUrl !== '') target="_blank" rel="noopener noreferrer" @endif
+                            class="w-10 h-10 bg-gray-800 border border-gray-600 rounded-full flex items-center justify-center transition {{ $instagramUrl !== '' ? 'hover:bg-black' : 'opacity-60 cursor-not-allowed' }}"
+                            title="Instagram SDN 2 Kepuk" aria-label="Instagram SDN 2 Kepuk"
+                            @if ($instagramUrl === '') aria-disabled="true" @endif>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16" fill="white"
+                                class="w-5 h-5">
+                                <path
+                                    d="M8 3.072a4.928 4.928 0 1 0 0 9.856 4.928 4.928 0 0 0 0-9.856zm0 8.128A3.2 3.2 0 1 1 8 4.8a3.2 3.2 0 0 1 0 6.4zm4.94-8.327a1.152 1.152 0 1 0 0 2.304 1.152 1.152 0 0 0 0-2.304z" />
+                                <path
+                                    d="M8 0C5.826 0 5.555.01 4.703.048c-.85.039-1.43.174-1.938.372a3.917 3.917 0 0 0-1.42.923A3.917 3.917 0 0 0 .42 2.765c-.198.508-.333 1.088-.372 1.938C.01 5.555 0 5.826 0 8c0 2.174.01 2.445.048 3.297.039.85.174 1.43.372 1.938.214.548.5 1.014.923 1.42.406.423.872.709 1.42.923.508.198 1.088.333 1.938.372C5.555 15.99 5.826 16 8 16c2.174 0 2.445-.01 3.297-.048.85-.039 1.43-.174 1.938-.372a3.917 3.917 0 0 0 1.42-.923c.423-.406.709-.872.923-1.42.198-.508.333-1.088.372-1.938.038-.852.048-1.123.048-3.297 0-2.174-.01-2.445-.048-3.297-.039-.85-.174-1.43-.372-1.938a3.916 3.916 0 0 0-.923-1.42 3.916 3.916 0 0 0-1.42-.923c-.508-.198-1.088-.333-1.938-.372C10.445.01 10.174 0 8 0zm0 1.441c2.137 0 2.39.008 3.231.046.777.035 1.199.166 1.479.275.371.144.636.317.915.596.279.279.452.544.596.915.109.28.24.702.275 1.479.038.841.046 1.094.046 3.231 0 2.137-.008 2.39-.046 3.231-.035.777-.166 1.199-.275 1.479a2.475 2.475 0 0 1-.596.915 2.475 2.475 0 0 1-.915.596c-.28.109-.702.24-1.479.275-.841.038-1.094.046-3.231.046-2.137 0-2.39-.008-3.231-.046-.777-.035-1.199-.166-1.479-.275a2.475 2.475 0 0 1-.915-.596 2.475 2.475 0 0 1-.596-.915c-.109-.28-.24-.702-.275-1.479C1.449 10.39 1.441 10.137 1.441 8c0-2.137.008-2.39.046-3.231.035-.777.166-1.199.275-1.479.144-.371.317-.636.596-.915.279-.279.544-.452.915-.596.28-.109.702-.24 1.479-.275C5.61 1.449 5.863 1.441 8 1.441z" />
+                            </svg>
+                        </a>
+
+                        <a href="{{ $facebookUrl !== '' ? $facebookUrl : 'javascript:void(0)' }}"
+                            @if ($facebookUrl !== '') target="_blank" rel="noopener noreferrer" @endif
+                            class="w-10 h-10 bg-gray-800 border border-gray-600 rounded-full flex items-center justify-center transition {{ $facebookUrl !== '' ? 'hover:bg-black' : 'opacity-60 cursor-not-allowed' }}"
+                            title="Facebook SDN 2 Kepuk" aria-label="Facebook SDN 2 Kepuk"
+                            @if ($facebookUrl === '') aria-disabled="true" @endif>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 512" fill="white"
+                                class="w-4 h-4">
+                                <path
+                                    d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
+                            </svg>
+                        </a>
+
+                        <a href="{{ $youtubeUrl !== '' ? $youtubeUrl : 'javascript:void(0)' }}"
+                            @if ($youtubeUrl !== '') target="_blank" rel="noopener noreferrer" @endif
+                            class="w-10 h-10 bg-gray-800 border border-gray-600 rounded-full flex items-center justify-center transition {{ $youtubeUrl !== '' ? 'hover:bg-black' : 'opacity-60 cursor-not-allowed' }}"
+                            title="YouTube SDN 2 Kepuk" aria-label="YouTube SDN 2 Kepuk"
+                            @if ($youtubeUrl === '') aria-disabled="true" @endif>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 576 512" fill="white"
+                                class="w-5 h-5">
+                                <path
+                                    d="M549.655 124.083c-6.281-23.65-24.772-42.149-48.424-48.435C458.932 64 288 64 288 64S117.068 64 74.77 75.648c-23.652 6.286-42.143 24.785-48.424 48.435C14.667 166.387 14.667 256 14.667 256s0 89.613 11.679 131.917c6.281 23.65 24.772 42.149 48.424 48.435C117.068 448 288 448 288 448s170.932 0 213.231-11.648c23.652-6.286 42.143-24.785 48.424-48.435C561.333 345.613 561.333 256 561.333 256s0-89.613-11.678-131.917zM232.727 337.818V174.182L361.818 256l-129.091 81.818z" />
                             </svg>
                         </a>
                     </div>
@@ -1481,6 +1665,7 @@
                         </li>
                         <li><a href="#berita" class="text-gray-400 hover:text-white transition">Berita &
                                 Pengumuman</a></li>
+                        <li><a href="#prestasi" class="text-gray-400 hover:text-white transition">Prestasi</a></li>
                         <li><a href="#guru" class="text-gray-400 hover:text-white transition">Tenaga
                                 Pendidik</a></li>
 
@@ -1506,6 +1691,7 @@
         window.cmsTeachersData = @json($teachersCms);
         window.cmsGalleryData = @json($galleryCms);
         window.cmsNewsData = @json($newsCms);
+        window.cmsAchievementsData = @json($prestasiItems);
         window.cmsStorageBaseUrl = @json($storageBaseUrl);
         window.cmsMediaBaseUrl = @json($mediaBaseUrl);
     </script>

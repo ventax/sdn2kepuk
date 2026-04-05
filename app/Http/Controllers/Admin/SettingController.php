@@ -37,6 +37,22 @@ class SettingController extends Controller
         $rules['misi'] = 'nullable|string';
         $rules['nilai_utama'] = 'nullable|string';
 
+        // Profil sekolah ringkas
+        $rules['school_name'] = 'nullable|string';
+        $rules['principal_name'] = 'nullable|string';
+        $rules['city'] = 'nullable|string';
+        $rules['school_accreditation'] = 'nullable|string';
+        $rules['school_address'] = 'nullable|string';
+        $rules['school_phone'] = 'nullable|string';
+        $rules['school_email'] = 'nullable|string';
+
+        // Media sosial dan maps
+        $rules['facebook_url'] = 'nullable|string';
+        $rules['instagram_url'] = 'nullable|string';
+        $rules['twitter_url'] = 'nullable|string';
+        $rules['youtube_url'] = 'nullable|string';
+        $rules['map_embed_url'] = 'nullable|string';
+
         $data = $request->validate($rules);
 
         // Logo
@@ -66,6 +82,22 @@ class SettingController extends Controller
         Setting::updateOrCreate(['key' => 'visi'], ['value' => $data['visi'] ?? '']);
         Setting::updateOrCreate(['key' => 'misi'], ['value' => $data['misi'] ?? '']);
         Setting::updateOrCreate(['key' => 'nilai_utama'], ['value' => $data['nilai_utama'] ?? '']);
+
+        // Simpan profil sekolah ringkas
+        Setting::updateOrCreate(['key' => 'school_name'], ['value' => $data['school_name'] ?? '']);
+        Setting::updateOrCreate(['key' => 'principal_name'], ['value' => $data['principal_name'] ?? '']);
+        Setting::updateOrCreate(['key' => 'city'], ['value' => $data['city'] ?? '']);
+        Setting::updateOrCreate(['key' => 'school_accreditation'], ['value' => $data['school_accreditation'] ?? '']);
+        Setting::updateOrCreate(['key' => 'school_address'], ['value' => $data['school_address'] ?? '']);
+        Setting::updateOrCreate(['key' => 'school_phone'], ['value' => $data['school_phone'] ?? '']);
+        Setting::updateOrCreate(['key' => 'school_email'], ['value' => $data['school_email'] ?? '']);
+
+        // Simpan media sosial dan maps
+        Setting::updateOrCreate(['key' => 'facebook_url'], ['value' => $data['facebook_url'] ?? '']);
+        Setting::updateOrCreate(['key' => 'instagram_url'], ['value' => $data['instagram_url'] ?? '']);
+        Setting::updateOrCreate(['key' => 'twitter_url'], ['value' => $data['twitter_url'] ?? '']);
+        Setting::updateOrCreate(['key' => 'youtube_url'], ['value' => $data['youtube_url'] ?? '']);
+        Setting::updateOrCreate(['key' => 'map_embed_url'], ['value' => $data['map_embed_url'] ?? '']);
 
         return redirect()->route('admin.settings.edit')->with('success', 'Profil berhasil diperbarui!');
     }
