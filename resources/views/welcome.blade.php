@@ -55,6 +55,7 @@
         $tiktokUrl = trim((string) ($contactCms['tiktok_url'] ?? '' ?: SettingHelper::get('tiktok_url', '')));
         $instagramUrl = trim((string) ($contactCms['instagram_url'] ?? '' ?: SettingHelper::get('instagram_url', '')));
         $facebookUrl = trim((string) ($contactCms['facebook_url'] ?? '' ?: SettingHelper::get('facebook_url', '')));
+        $twitterUrl = trim((string) ($contactCms['twitter_url'] ?? '' ?: SettingHelper::get('twitter_url', '')));
         $youtubeUrl = trim((string) ($contactCms['youtube_url'] ?? '' ?: SettingHelper::get('youtube_url', '')));
 
         $baseUrl = rtrim(request()->getBaseUrl(), '/');
@@ -609,12 +610,30 @@
                 height: 320px;
             }
 
+            #guru {
+                padding-top: 3.75rem !important;
+                padding-bottom: 3.75rem !important;
+            }
+
+            #guru .text-center.mb-16 {
+                margin-bottom: 1.25rem !important;
+            }
+
+            #guru .text-center.mb-16 h2 {
+                font-size: 1.6rem;
+                line-height: 1.3;
+            }
+
+            #guru .text-center.mb-16 p {
+                font-size: .9rem;
+            }
+
             #teacherFilterWrap {
                 flex-wrap: nowrap;
                 justify-content: flex-start;
                 overflow-x: auto;
                 padding-bottom: .35rem;
-                margin-bottom: 1.25rem;
+                margin-bottom: .95rem;
             }
 
             #teacherFilterWrap .filter-btn {
@@ -625,36 +644,43 @@
             }
 
             #teachersGrid {
-                gap: .85rem !important;
-                margin-bottom: 0 !important;
+                flex-wrap: nowrap;
+                justify-content: flex-start;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                gap: .7rem !important;
+                margin: 0 -.1rem 0 !important;
+                padding: 0 .1rem .35rem;
             }
 
             .teacher-card-item {
-                width: calc(50% - .45rem);
-                min-width: 0;
-                padding: 1rem !important;
+                width: min(76vw, 235px);
+                min-width: min(76vw, 235px);
+                flex: 0 0 auto;
+                scroll-snap-align: start;
+                padding: .85rem !important;
                 border-radius: 1rem;
             }
 
             .teacher-photo-wrapper {
-                width: 92px;
-                margin: 0 auto .75rem;
+                width: 84px;
+                margin: 0 auto .55rem;
             }
 
             .teacher-photo {
-                width: 92px;
-                height: 92px;
-                font-size: 2rem;
+                width: 84px;
+                height: 84px;
+                font-size: 1.8rem;
                 border-width: 3px;
             }
 
             .teacher-card-item h3 {
-                font-size: 1rem;
-                line-height: 1.35;
+                font-size: .95rem;
+                line-height: 1.3;
             }
 
             .teacher-card-item p {
-                font-size: .92rem;
+                font-size: .85rem;
             }
         }
 
@@ -1647,6 +1673,18 @@
                                 class="w-4 h-4">
                                 <path
                                     d="M279.14 288l14.22-92.66h-88.91v-60.13c0-25.35 12.42-50.06 52.24-50.06h40.42V6.26S260.43 0 225.36 0c-73.22 0-121.08 44.38-121.08 124.72v70.62H22.89V288h81.39v224h100.17V288z" />
+                            </svg>
+                        </a>
+
+                        <a href="{{ $twitterUrl !== '' ? $twitterUrl : 'javascript:void(0)' }}"
+                            @if ($twitterUrl !== '') target="_blank" rel="noopener noreferrer" @endif
+                            class="w-10 h-10 bg-gray-800 border border-gray-600 rounded-full flex items-center justify-center transition {{ $twitterUrl !== '' ? 'hover:bg-black' : 'opacity-60 cursor-not-allowed' }}"
+                            title="Twitter/X SDN 2 Kepuk" aria-label="Twitter/X SDN 2 Kepuk"
+                            @if ($twitterUrl === '') aria-disabled="true" @endif>
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 1227" fill="white"
+                                class="w-4 h-4">
+                                <path
+                                    d="M714.163 519.284L1160.89 0h-105.86L667.137 450.887 357.328 0H0l468.492 681.821L0 1226.37h105.866l409.625-476.152 327.181 476.152H1200L714.137 519.284h.026zM569.165 687.828l-47.468-67.894L154.793 93.119h162.604l296.217 423.852 47.468 67.894 384.682 550.49H883.16L569.165 687.854v-.026z" />
                             </svg>
                         </a>
 

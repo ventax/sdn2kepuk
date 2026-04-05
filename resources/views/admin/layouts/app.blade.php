@@ -4,7 +4,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    @php
+        $schoolLogo = \App\Helpers\SettingHelper::get('logo_image');
+        $schoolFavicon = $schoolLogo ? asset('storage/' . $schoolLogo) : asset('images/logo-sdn2-kepuk.jpeg');
+    @endphp
     <title>@yield('title', 'Admin CMS')</title>
+    <link rel="icon" type="image/jpeg" href="{{ $schoolFavicon }}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ $schoolFavicon }}">
+    <link rel="apple-touch-icon" href="{{ $schoolFavicon }}">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
     <link rel="preconnect" href="https://fonts.googleapis.com">
