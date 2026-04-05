@@ -49,6 +49,7 @@ class SettingController extends Controller
         // Media sosial dan maps
         $rules['facebook_url'] = 'nullable|string';
         $rules['instagram_url'] = 'nullable|string';
+        $rules['tiktok_url'] = 'nullable|string';
         $rules['twitter_url'] = 'nullable|string';
         $rules['youtube_url'] = 'nullable|string';
         $rules['map_embed_url'] = 'nullable|string';
@@ -95,6 +96,7 @@ class SettingController extends Controller
         // Simpan media sosial dan maps
         Setting::updateOrCreate(['key' => 'facebook_url'], ['value' => $data['facebook_url'] ?? '']);
         Setting::updateOrCreate(['key' => 'instagram_url'], ['value' => $data['instagram_url'] ?? '']);
+        Setting::updateOrCreate(['key' => 'tiktok_url'], ['value' => $data['tiktok_url'] ?? '']);
         Setting::updateOrCreate(['key' => 'twitter_url'], ['value' => $data['twitter_url'] ?? '']);
         Setting::updateOrCreate(['key' => 'youtube_url'], ['value' => $data['youtube_url'] ?? '']);
         Setting::updateOrCreate(['key' => 'map_embed_url'], ['value' => $data['map_embed_url'] ?? '']);

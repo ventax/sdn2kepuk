@@ -369,12 +369,16 @@
                 </a>
 
                 <div class="menu-group-title">Konten</div>
-                @php $activeContentTab = request('tab', 'teachers'); @endphp
+                @php $activeContentTab = request('tab', 'sambutan'); @endphp
                 <a href="{{ route('admin.home-content.edit') }}"
                     class="side-link {{ request()->routeIs('admin.home-content.*') ? 'active' : '' }}">
                     <i class="bi bi-collection"></i> Kelola Konten
                 </a>
                 <div class="side-sublink-wrap">
+                    <a href="{{ route('admin.home-content.edit', ['tab' => 'sambutan']) }}"
+                        class="side-sublink {{ request()->routeIs('admin.home-content.*') && $activeContentTab === 'sambutan' ? 'active' : '' }}">
+                        <i class="bi bi-chat-quote"></i> Sambutan
+                    </a>
                     <a href="{{ route('admin.home-content.edit', ['tab' => 'teachers']) }}"
                         class="side-sublink {{ request()->routeIs('admin.home-content.*') && $activeContentTab === 'teachers' ? 'active' : '' }}">
                         <i class="bi bi-person-badge"></i> Guru

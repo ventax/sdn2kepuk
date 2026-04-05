@@ -52,10 +52,10 @@
         $ppdbWa2 = $contactCms['ppdb_whatsapp_2'] ?? '6282131607875';
         $ppdbLabel1 = $contactCms['ppdb_label_1'] ?? 'Bu Zuli';
         $ppdbLabel2 = $contactCms['ppdb_label_2'] ?? 'Pak Fina';
-        $tiktokUrl = trim((string) ($contactCms['tiktok_url'] ?? ''));
-        $instagramUrl = trim((string) ($contactCms['instagram_url'] ?? ''));
-        $facebookUrl = trim((string) ($contactCms['facebook_url'] ?? ''));
-        $youtubeUrl = trim((string) ($contactCms['youtube_url'] ?? ''));
+        $tiktokUrl = trim((string) ($contactCms['tiktok_url'] ?? '' ?: SettingHelper::get('tiktok_url', '')));
+        $instagramUrl = trim((string) ($contactCms['instagram_url'] ?? '' ?: SettingHelper::get('instagram_url', '')));
+        $facebookUrl = trim((string) ($contactCms['facebook_url'] ?? '' ?: SettingHelper::get('facebook_url', '')));
+        $youtubeUrl = trim((string) ($contactCms['youtube_url'] ?? '' ?: SettingHelper::get('youtube_url', '')));
 
         $baseUrl = rtrim(request()->getBaseUrl(), '/');
         $storageBaseUrl = ($baseUrl !== '' ? $baseUrl : '') . '/storage';
@@ -106,6 +106,16 @@
         $headmasterName = $headmaster['name'] ?? 'Sri Nuraini, S.Pd.SD';
         $headmasterPosition = $headmaster['position'] ?? 'Kepala SD Negeri 2 Kepuk';
         $headmasterPhoto = $resolveCmsMediaUrl($headmaster['photo_path'] ?? '');
+        $headmasterGreetingRaw = SettingHelper::get(
+            'headmaster_greeting',
+            "Assalamu'alaikum Wr. Wb.\n\nDi masa sekarang penyampaian informasi tidak terbatas hanya pada surat, namun juga media sosial sangat berpengaruh. Untuk itu SD Negeri 2 Kepuk telah merilis website resmi ini. Dengan adanya website ini semoga informasi-informasi dapat dengan mudah diakses. Kegiatan-kegiatan yang dilaksanakan di SD Negeri 2 Kepuk juga dapat diketahui oleh publik yang lebih luas lagi.\n\nWassalamu'alaikum Wr. Wb.",
+        );
+        $headmasterGreetingParagraphs = array_values(
+            array_filter(
+                array_map('trim', preg_split('/\r?\n\s*\r?\n/', (string) $headmasterGreetingRaw) ?: []),
+                fn($paragraph) => $paragraph !== '',
+            ),
+        );
 
         $ppdbBadgeText = $ppdbCms['badge_text'] ?? 'Penerimaan Peserta Didik Baru';
         $ppdbTitle = $ppdbCms['title'] ?? 'PPDB';
@@ -948,13 +958,9 @@
                         </div>
                     </div>
                     <div class="mt-24 text-gray-800 leading-relaxed space-y-3 text-base">
-                        <p>Assalamu'alaikum Wr. Wb.</p>
-                        <p>Di masa sekarang penyampaian informasi tidak terbatas hanya pada surat, namun juga media
-                            sosial sangat berpengaruh. Untuk itu SD Negeri 2 Kepuk telah merilis website resmi ini.
-                            Dengan adanya website ini semoga informasi-informasi dapat dengan mudah diakses.
-                            Kegiatan-kegiatan yang dilaksanakan di SD Negeri 2 Kepuk juga dapat diketahui oleh publik
-                            yang lebih luas lagi.</p>
-                        <p>Wassalamu'alaikum Wr. Wb.</p>
+                        @foreach ($headmasterGreetingParagraphs as $paragraph)
+                            <p>{{ $paragraph }}</p>
+                        @endforeach
                     </div>
                     <div class="mt-6 pt-5 border-t border-gray-100">
                         <p class="font-bold text-gray-900 text-base">{{ $headmasterName }}</p>

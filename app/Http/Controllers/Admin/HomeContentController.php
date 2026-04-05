@@ -10,6 +10,11 @@ class HomeContentController extends Controller
 {
     public function edit()
     {
+        $headmasterGreeting = Setting::where('key', 'headmaster_greeting')->value('value');
+        if (! is_string($headmasterGreeting) || trim($headmasterGreeting) === '') {
+            $headmasterGreeting = "Assalamu'alaikum Wr. Wb.\n\nDi masa sekarang penyampaian informasi tidak terbatas hanya pada surat, namun juga media sosial sangat berpengaruh. Untuk itu SD Negeri 2 Kepuk telah merilis website resmi ini. Dengan adanya website ini semoga informasi-informasi dapat dengan mudah diakses. Kegiatan-kegiatan yang dilaksanakan di SD Negeri 2 Kepuk juga dapat diketahui oleh publik yang lebih luas lagi.\n\nWassalamu'alaikum Wr. Wb.";
+        }
+
         $teachers = $this->decodeSetting('teachers_data', [
             ['name' => 'Sri Nuraini, S.Pd.SD', 'position' => 'Kepala Sekolah', 'category' => 'kepala', 'education' => 'S1 Pendidikan', 'experience' => '20 Tahun', 'bio' => 'Memimpin SD Negeri 2 Kepuk dengan fokus karakter dan prestasi.', 'email' => 'sdn2kepukbangsri@gmail.com', 'phone' => '-', 'achievements' => "Kepala sekolah berpengalaman", 'photo_path' => 'bg7.png'],
             ['name' => 'Miftahul Umam, S.Pd', 'position' => 'Guru Kelas 4', 'category' => 'guru', 'education' => 'S1 PGSD', 'experience' => '12 Tahun', 'bio' => 'Guru kelas dengan pendekatan pembelajaran aktif dan kreatif.', 'email' => '-', 'phone' => '-', 'achievements' => "Guru teladan", 'photo_path' => 'bg1.png'],
@@ -55,12 +60,14 @@ class HomeContentController extends Controller
             'flyer_image' => '',
         ]);
 
-        return view('admin.home-content.edit', compact('teachers', 'gallery', 'news', 'achievements', 'contact', 'ppdb'));
+        return view('admin.home-content.edit', compact('headmasterGreeting', 'teachers', 'gallery', 'news', 'achievements', 'contact', 'ppdb'));
     }
 
     public function update(Request $request)
     {
         $data = $request->validate([
+            'headmaster_greeting' => ['nullable', 'string'],
+
             'teachers' => ['nullable', 'array'],
             'teachers.*.name' => ['nullable', 'string'],
             'teachers.*.position' => ['nullable', 'string'],
@@ -184,6 +191,7 @@ class HomeContentController extends Controller
         Setting::updateOrCreate(['key' => 'news_data'], ['value' => json_encode($news)]);
         Setting::updateOrCreate(['key' => 'achievements_data'], ['value' => json_encode($achievements)]);
         Setting::updateOrCreate(['key' => 'contact_data'], ['value' => json_encode($data['contact'] ?? [])]);
+        Setting::updateOrCreate(['key' => 'headmaster_greeting'], ['value' => trim((string) ($data['headmaster_greeting'] ?? ''))]);
 
         $ppdb = $data['ppdb'] ?? [];
         if ($request->hasFile('ppdb_flyer')) {

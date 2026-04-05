@@ -187,6 +187,13 @@
 
                         <div class="mb-3">
                             <label class="form-label settings-label"><i
+                                    class="bi bi-tiktok text-primary me-1"></i>TikTok</label>
+                            <input type="text" class="form-control" name="tiktok_url"
+                                value="{{ $settings['tiktok_url'] ?? '' }}" placeholder="https://www.tiktok.com/@...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label settings-label"><i
                                     class="bi bi-twitter-x text-primary me-1"></i>Twitter /
                                 X</label>
                             <input type="text" class="form-control" name="twitter_url"
