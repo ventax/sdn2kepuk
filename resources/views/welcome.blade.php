@@ -9,9 +9,26 @@
         content="SD Negeri 2 Kepuk - Sekolah Dasar terkemuka dengan tenaga pendidik profesional dan fasilitas modern">
     @php
         use App\Helpers\SettingHelper;
+        use Illuminate\Support\Facades\Storage;
         $backgroundImage = SettingHelper::get('background_image');
         $mainImage = SettingHelper::get('main_image');
         $logoImage = SettingHelper::get('logo_image');
+        $versionedStorageUrl = function (?string $path) {
+            $normalized = ltrim(str_replace('\\', '/', (string) $path), '/');
+
+            if ($normalized === '') {
+                return '';
+            }
+
+            $url = asset('storage/' . $normalized);
+
+            if (Storage::disk('public')->exists($normalized)) {
+                return $url . '?v=' . Storage::disk('public')->lastModified($normalized);
+            }
+
+            return $url;
+        };
+        $logoImageUrl = $logoImage ? $versionedStorageUrl($logoImage) : asset('images/logo-sdn2-kepuk.jpeg');
         // Hero slides
         $heroSlides = [];
         for ($i = 1; $i <= 3; $i++) {
@@ -74,15 +91,36 @@
             }
 
             if (str_starts_with($normalized, '/storage/')) {
-                return $mediaBaseUrl . '/' . ltrim(str_replace('/storage/', '', $normalized), '/');
+                $normalized = ltrim(str_replace('/storage/', '', $normalized), '/');
+                $url = $mediaBaseUrl . '/' . $normalized;
+
+                if (Storage::disk('public')->exists($normalized)) {
+                    return $url . '?v=' . Storage::disk('public')->lastModified($normalized);
+                }
+
+                return $url;
             }
 
             if (str_starts_with($normalized, 'storage/')) {
-                return $mediaBaseUrl . '/' . ltrim(str_replace('storage/', '', $normalized), '/');
+                $normalized = ltrim(str_replace('storage/', '', $normalized), '/');
+                $url = $mediaBaseUrl . '/' . $normalized;
+
+                if (Storage::disk('public')->exists($normalized)) {
+                    return $url . '?v=' . Storage::disk('public')->lastModified($normalized);
+                }
+
+                return $url;
             }
 
             if (str_starts_with($normalized, 'public/')) {
-                return $mediaBaseUrl . '/' . ltrim(str_replace('public/', '', $normalized), '/');
+                $normalized = ltrim(str_replace('public/', '', $normalized), '/');
+                $url = $mediaBaseUrl . '/' . $normalized;
+
+                if (Storage::disk('public')->exists($normalized)) {
+                    return $url . '?v=' . Storage::disk('public')->lastModified($normalized);
+                }
+
+                return $url;
             }
 
             // For legacy/default bare filenames (e.g. b1.jpg), use public asset path.
@@ -90,7 +128,14 @@
                 return asset($normalized);
             }
 
-            return $mediaBaseUrl . '/' . ltrim($normalized, '/');
+            $normalized = ltrim($normalized, '/');
+            $url = $mediaBaseUrl . '/' . $normalized;
+
+            if (Storage::disk('public')->exists($normalized)) {
+                return $url . '?v=' . Storage::disk('public')->lastModified($normalized);
+            }
+
+            return $url;
         };
 
         $headmaster = null;
@@ -169,10 +214,8 @@
         ];
         $prestasiItems = count($achievementsCms) > 0 ? $achievementsCms : $defaultAchievements;
     @endphp
-    <link rel="icon" type="image/jpeg"
-        href="{{ $logoImage ? asset('storage/' . $logoImage) : asset('images/logo-sdn2-kepuk.jpeg') }}">
-    <link rel="shortcut icon" type="image/jpeg"
-        href="{{ $logoImage ? asset('storage/' . $logoImage) : asset('images/logo-sdn2-kepuk.jpeg') }}">
+    <link rel="icon" type="image/jpeg" href="{{ $logoImageUrl }}">
+    <link rel="shortcut icon" type="image/jpeg" href="{{ $logoImageUrl }}">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -781,8 +824,7 @@
         <div class="max-w-7xl mx-auto px-4">
             <div class="flex justify-between items-center h-14">
                 <div class="flex items-center space-x-3">
-                    <img src="{{ $logoImage ? asset('storage/' . $logoImage) : asset('images/logo-sdn2-kepuk.jpeg') }}"
-                        alt="Logo SD Negeri 2 Kepuk" class="w-9 h-9 object-contain">
+                    <img src="{{ $logoImageUrl }}" alt="Logo SD Negeri 2 Kepuk" class="w-9 h-9 object-contain">
                     <div>
                         <h1 class="text-base font-bold text-gray-900 leading-tight">SD Negeri 2 Kepuk</h1>
                         <p class="text-xs text-gray-500">Unggul dalam Prestasi &amp; Karakter</p>
@@ -848,7 +890,7 @@
         <div class="slider-container">
             @foreach ($heroSlides as $idx => $slide)
                 <div class="slide{{ $idx === 0 ? ' active' : '' }}"
-                    style="background:url('{{ $slide['background'] ? asset('storage/' . $slide['background']) : 'slide_' . ($idx + 1) . '.jpg' }}') center/cover no-repeat;">
+                    style="background:url('{{ $slide['background'] ? $versionedStorageUrl($slide['background']) : 'slide_' . ($idx + 1) . '.jpg' }}') center/cover no-repeat;">
                     <div class="max-w-7xl mx-auto px-4 w-full">
                         <div class="max-w-3xl mx-auto text-white text-center">
                             <h1 class="text-3xl md:text-4xl lg:text-5xl font-serif font-bold mb-4 leading-tight">
@@ -1169,6 +1211,12 @@
                 <div class="gallery-item-sm reveal" data-category="pembelajaran" onclick="openLightbox(13)"><img
                         src="g14.webp" alt="Sholat Berjamaah di Kelas"></div>
             </div>
+            <div id="galleryToggleWrap" class="text-center mt-6 hidden">
+                <button id="galleryToggleButton" type="button" onclick="toggleGallery()"
+                    class="inline-flex items-center gap-2 px-5 py-2 rounded-full border border-gray-300 bg-white text-blue-700 text-sm font-semibold hover:border-blue-300 hover:bg-blue-50 transition">
+                    Lihat Selengkapnya
+                </button>
+            </div>
         </div>
     </section>
 
@@ -1346,73 +1394,102 @@
     </div>
 
     <!-- Prestasi -->
-    <section id="prestasi" class="py-16 md:py-20 bg-gradient-to-b from-blue-50 to-white">
+    <section id="prestasi" class="py-24 bg-white">
         <div class="max-w-7xl mx-auto px-4">
-            <div class="text-center mb-8 md:mb-12 reveal">
-                <h2 class="text-2xl md:text-3xl lg:text-4xl font-serif font-bold text-gray-900 mb-2">Prestasi Siswa &
-                    Sekolah</h2>
-                <p class="text-sm md:text-base text-gray-500 max-w-3xl mx-auto">Capaian membanggakan di bidang
-                    akademik,
+            <div class="text-center mb-16 reveal">
+                <h2 class="text-3xl lg:text-4xl font-serif font-bold text-gray-900 mb-2">Prestasi Siswa & Sekolah</h2>
+                <p class="text-base text-gray-500 max-w-3xl mx-auto">Capaian membanggakan di bidang akademik,
                     non-akademik, dan karakter.</p>
             </div>
 
-            <div class="prestasi-mobile-only md:hidden -mx-4 px-4 mb-2 reveal">
-                <div class="prestasi-mobile-scroll">
-                    @foreach ($prestasiItems as $prestasi)
-                        @php
-                            $prestasiImage = $resolveCmsMediaUrl($prestasi['image_path'] ?? '');
-                        @endphp
-                        <article
-                            class="prestasi-card-mobile bg-white rounded-2xl border border-blue-100 shadow-sm hover:shadow-lg transition overflow-hidden flex flex-col">
-                            <div class="relative">
+            <div class="relative reveal">
+                <button onclick="prevPrestasiSlide()"
+                    class="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-5 z-10 w-11 h-11 bg-white border border-gray-200 rounded-full shadow-md flex items-center justify-center hover:bg-blue-600 hover:text-white hover:border-blue-600 transition group">
+                    <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                    </svg>
+                </button>
+
+                <button onclick="nextPrestasiSlide()"
+                    class="absolute right-0 top-1/2 -translate-y-1/2 translate-x-5 z-10 w-11 h-11 bg-white border border-gray-200 rounded-full shadow-md flex items-center justify-center hover:bg-blue-600 hover:text-white hover:border-blue-600 transition group">
+                    <svg class="w-5 h-5 text-gray-600 group-hover:text-white" fill="none" stroke="currentColor"
+                        viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <div class="overflow-hidden">
+                    <div id="prestasiTrack" class="flex transition-transform duration-500 ease-in-out gap-5">
+                        @foreach ($prestasiItems as $index => $prestasi)
+                            @php
+                                $prestasiImage = $resolveCmsMediaUrl($prestasi['image_path'] ?? '');
+                            @endphp
+                            <article
+                                class="bg-white rounded-xl shadow-sm border overflow-hidden card-hover flex flex-col cursor-pointer shrink-0"
+                                style="width: calc((100% - 3*1.25rem) / 4)"
+                                onclick="openPrestasi({{ $index }})">
                                 <img src="{{ $prestasiImage !== '' ? $prestasiImage : 'b1.jpg' }}"
-                                    alt="{{ $prestasi['title'] ?? 'Prestasi' }}" class="w-full h-44 object-cover">
-                                <span
-                                    class="absolute left-3 top-3 text-[11px] font-semibold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full">
-                                    {{ $prestasi['level'] ?? 'Prestasi' }}
-                                </span>
-                            </div>
-                            <div class="p-4 flex flex-col flex-1">
-                                <p class="text-xs text-blue-700 font-semibold mb-1.5">{{ $prestasi['date'] ?? '' }}
-                                </p>
-                                <h3 class="text-sm font-bold text-gray-900 leading-snug mb-2 line-clamp-2">
-                                    {{ $prestasi['title'] ?? '' }}</h3>
-                                <p class="text-xs text-gray-600 leading-relaxed line-clamp-3">
-                                    {{ $prestasi['description'] ?? '' }}</p>
-                            </div>
-                        </article>
+                                    alt="{{ $prestasi['title'] ?? 'Prestasi' }}" class="w-full h-56 object-cover">
+                                <div class="p-4 flex flex-col flex-1">
+                                    <div class="flex items-center gap-2 mb-1.5">
+                                        <span
+                                            class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">{{ $prestasi['level'] ?? 'Prestasi' }}</span>
+                                        <span class="text-xs text-gray-400">{{ $prestasi['date'] ?? '-' }}</span>
+                                    </div>
+                                    <h4 class="text-sm font-bold text-gray-900 mb-1.5 leading-snug line-clamp-2">
+                                        {{ $prestasi['title'] ?? '' }}</h4>
+                                    <p class="text-xs text-gray-500 leading-relaxed flex-1 line-clamp-2">
+                                        {{ $prestasi['description'] ?? '' }}</p>
+                                    <button onclick="event.stopPropagation();openPrestasi({{ $index }})"
+                                        class="text-xs text-blue-600 font-semibold mt-2 inline-flex items-center hover:text-blue-800 transition">Baca
+                                        Selengkapnya <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M9 5l7 7-7 7"></path>
+                                        </svg></button>
+                                </div>
+                            </article>
+                        @endforeach
+                    </div>
+                </div>
+
+                <div id="prestasiDots" class="flex justify-center gap-2 mt-6">
+                    @foreach ($prestasiItems as $index => $prestasi)
+                        <button
+                            class="prestasi-dot w-3 h-3 rounded-full {{ $index === 0 ? 'bg-blue-600' : 'bg-gray-300' }} transition-all"
+                            onclick="goToPrestasiSlide({{ $index }})"></button>
                     @endforeach
                 </div>
-                <p class="text-[11px] text-gray-400 mt-2">Geser ke samping untuk melihat prestasi lainnya.</p>
-            </div>
-
-            <div class="prestasi-desktop-only hidden md:grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                @foreach ($prestasiItems as $prestasi)
-                    @php
-                        $prestasiImage = $resolveCmsMediaUrl($prestasi['image_path'] ?? '');
-                    @endphp
-                    <article
-                        class="reveal bg-white rounded-2xl border border-blue-100 shadow-sm hover:shadow-lg transition overflow-hidden flex flex-col">
-                        <div class="relative">
-                            <img src="{{ $prestasiImage !== '' ? $prestasiImage : 'b1.jpg' }}"
-                                alt="{{ $prestasi['title'] ?? 'Prestasi' }}" class="w-full h-52 object-cover">
-                            <span
-                                class="absolute left-3 top-3 text-xs font-semibold text-blue-700 bg-blue-100 px-2.5 py-1 rounded-full">
-                                {{ $prestasi['level'] ?? 'Prestasi' }}
-                            </span>
-                        </div>
-                        <div class="p-5 flex flex-col flex-1">
-                            <p class="text-xs text-blue-700 font-semibold mb-2">{{ $prestasi['date'] ?? '' }}</p>
-                            <h3 class="text-base font-bold text-gray-900 leading-snug mb-2">
-                                {{ $prestasi['title'] ?? '' }}</h3>
-                            <p class="text-sm text-gray-600 leading-relaxed flex-1">
-                                {{ $prestasi['description'] ?? '' }}</p>
-                        </div>
-                    </article>
-                @endforeach
             </div>
         </div>
     </section>
+
+    <!-- Modal Prestasi -->
+    <div id="prestasiModal" class="modal" onclick="handlePrestasiModalClick(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <div id="prestasiModalImg" class="w-full h-64 overflow-hidden rounded-t-2xl"><img
+                    id="prestasiModalImgSrc" src="" alt="" class="w-full h-full object-cover">
+            </div>
+            <div class="sticky top-0 bg-white border-b px-6 py-4 flex justify-between items-center z-10">
+                <div class="flex items-center gap-2">
+                    <span id="prestasiModalTag" class="text-xs font-semibold px-2 py-0.5 rounded-full"></span>
+                    <span id="prestasiModalDate" class="text-xs text-gray-400"></span>
+                </div>
+                <button onclick="closePrestasi()"
+                    class="w-9 h-9 bg-gray-100 hover:bg-gray-200 rounded-full flex items-center justify-center transition">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6">
+                <h3 id="prestasiModalTitle" class="text-2xl font-bold text-gray-900 mb-4 leading-snug"></h3>
+                <div id="prestasiModalBody" class="text-gray-600 leading-relaxed space-y-4 text-sm"></div>
+            </div>
+        </div>
+    </div>
 
     <!-- Lightbox -->
     <div id="lightbox" class="lightbox" onclick="handleLightboxClick(event)">
@@ -1631,8 +1708,7 @@
             <div class="grid md:grid-cols-4 gap-8 mb-8">
                 <div class="md:col-span-2">
                     <div class="flex items-center space-x-3 mb-4">
-                        <img src="{{ $logoImage ? asset('storage/' . $logoImage) : asset('images/logo-sdn2-kepuk.jpeg') }}"
-                            alt="Logo" class="w-12 h-12 object-contain">
+                        <img src="{{ $logoImageUrl }}" alt="Logo" class="w-12 h-12 object-contain">
                         <h3 class="text-xl font-bold">SD Negeri 2 Kepuk</h3>
                     </div>
                     <p class="text-gray-400 leading-relaxed mb-4">Lembaga pendidikan yang berkomitmen membentuk
@@ -1740,7 +1816,7 @@
         window.cmsMediaBaseUrl = @json($mediaBaseUrl);
     </script>
 
-    <script src="{{ asset('js/script.js') }}"></script>
+    <script src="{{ asset('js/script.js') }}?v={{ @filemtime(public_path('js/script.js')) ?: time() }}"></script>
 </body>
 
 </html>

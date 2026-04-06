@@ -6,7 +6,16 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     @php
         $schoolLogo = \App\Helpers\SettingHelper::get('logo_image');
-        $schoolFavicon = $schoolLogo ? asset('storage/' . $schoolLogo) : asset('images/logo-sdn2-kepuk.jpeg');
+        $schoolFavicon = asset('images/logo-sdn2-kepuk.jpeg');
+        if ($schoolLogo) {
+            $normalizedLogo = ltrim(str_replace('\\', '/', (string) $schoolLogo), '/');
+            $schoolFavicon = asset('storage/' . $normalizedLogo);
+
+            if (\Illuminate\Support\Facades\Storage::disk('public')->exists($normalizedLogo)) {
+                $schoolFavicon .=
+                    '?v=' . \Illuminate\Support\Facades\Storage::disk('public')->lastModified($normalizedLogo);
+            }
+        }
     @endphp
     <title>@yield('title', 'Admin Login')</title>
     <link rel="icon" type="image/jpeg" href="{{ $schoolFavicon }}">

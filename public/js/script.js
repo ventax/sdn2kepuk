@@ -376,6 +376,9 @@ function renderGalleryFromCms(items) {
         categoryWrap.innerHTML = `<button onclick="filterGallery(event,'all')" class="gallery-category-btn active px-4 py-1.5 text-sm rounded-full border border-gray-300 bg-white">Semua</button>` +
             categories.map(category => `<button onclick="filterGallery(event,'${category}')" class="gallery-category-btn px-4 py-1.5 text-sm rounded-full border border-gray-300 bg-white">${category}</button>`).join('');
     }
+
+    // Keep initial gallery state collapsed even after CMS data re-renders the grid.
+    applyGalleryLimit();
 }
 
 let currentImageIndex = 0;
@@ -383,13 +386,33 @@ let currentImageIndex = 0;
 // =====================
 // GALLERY SHOW MORE
 // =====================
+const GALLERY_INITIAL_LIMIT = 4;
 let currentGalleryCategory = 'all';
+let isGalleryExpanded = false;
 
 function applyGalleryLimit() {
     const allItems = document.querySelectorAll('.gallery-item-sm');
+    const toggleWrap = document.getElementById('galleryToggleWrap');
+    const toggleButton = document.getElementById('galleryToggleButton');
+    let visibleIndex = 0;
+    let matchingCount = 0;
+
     allItems.forEach(item => {
         const matchesFilter = currentGalleryCategory === 'all' || item.dataset.category === currentGalleryCategory;
         if (matchesFilter) {
+            matchingCount++;
+            const shouldShow = isGalleryExpanded || visibleIndex < GALLERY_INITIAL_LIMIT;
+            visibleIndex++;
+
+            if (!shouldShow) {
+                item.style.opacity = '0';
+                item.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    item.style.display = 'none';
+                }, 200);
+                return;
+            }
+
             item.style.display = 'block';
             item.style.opacity = '1';
             item.style.transform = 'translateY(0)';
@@ -399,16 +422,32 @@ function applyGalleryLimit() {
             setTimeout(() => { item.style.display = 'none'; }, 200);
         }
     });
+
+    if (toggleWrap && toggleButton) {
+        const hiddenCount = Math.max(matchingCount - GALLERY_INITIAL_LIMIT, 0);
+
+        if (matchingCount > GALLERY_INITIAL_LIMIT) {
+            toggleWrap.classList.remove('hidden');
+
+            if (isGalleryExpanded) {
+                toggleButton.textContent = 'Sembunyikan';
+            } else {
+                toggleButton.textContent = `Lihat Selengkapnya (${hiddenCount} foto lainnya)`;
+            }
+        } else {
+            toggleWrap.classList.add('hidden');
+        }
+    }
 }
 
 function toggleGallery() {
-    // No-op: gallery limit is disabled, all photos are shown.
+    isGalleryExpanded = !isGalleryExpanded;
     applyGalleryLimit();
 }
 
 function filterGallery(event, category) {
     currentGalleryCategory = category;
-    const items = document.querySelectorAll('.gallery-item, .gallery-item-sm');
+    isGalleryExpanded = false;
     const btns = document.querySelectorAll('.gallery-category-btn');
 
     btns.forEach(btn => btn.classList.remove('active'));
@@ -525,6 +564,36 @@ let beritaData = [
     }
 ];
 
+let prestasiData = [
+    {
+        img: 'b1.jpg',
+        level: 'Akademik',
+        tagClass: 'text-blue-600 bg-blue-100',
+        date: 'Februari 2024',
+        title: 'Juara 2 Olimpiade Sains Nasional Tingkat Kecamatan',
+        summary: 'Siswa SDN 2 Kepuk meraih medali perak pada ajang OSN tingkat kecamatan.',
+        body: 'Siswa SDN 2 Kepuk meraih medali perak pada ajang OSN tingkat kecamatan.'
+    },
+    {
+        img: 'b3.jpg',
+        level: 'Pramuka',
+        tagClass: 'text-blue-600 bg-blue-100',
+        date: 'Maret 2024',
+        title: 'Juara 3 Pesta Siaga Kecamatan Bangsri',
+        summary: 'Kontingen siaga tampil kompak dan berhasil membawa pulang juara 3.',
+        body: 'Kontingen siaga tampil kompak dan berhasil membawa pulang juara 3.'
+    },
+    {
+        img: 'b4.jpg',
+        level: 'Seni Budaya',
+        tagClass: 'text-blue-600 bg-blue-100',
+        date: 'September 2024',
+        title: 'Juara Harapan 1 Festival Tunas Bahasa Ibu',
+        summary: 'Siswa SDN 2 Kepuk menunjukkan performa terbaik pada ajang FTBI.',
+        body: 'Siswa SDN 2 Kepuk menunjukkan performa terbaik pada ajang FTBI.'
+    }
+];
+
 function renderNewsFromCms(items) {
     const track = document.getElementById('beritaTrack');
     if (!track || !Array.isArray(items) || !items.length) return;
@@ -580,6 +649,68 @@ function closeBerita() {
 
 function handleBeritaModalClick(event) {
     if (event.target.id === 'beritaModal') closeBerita();
+}
+
+function renderPrestasiFromCms(items) {
+    const track = document.getElementById('prestasiTrack');
+    if (!track || !Array.isArray(items) || !items.length) return;
+
+    prestasiData = items.map((item) => ({
+        img: resolveCmsImagePath(item.image_path || ''),
+        level: item.level || 'Prestasi',
+        tagClass: 'text-blue-600 bg-blue-100',
+        date: item.date || '-',
+        title: item.title || '-',
+        summary: item.description || '-',
+        body: item.description || '-',
+    }));
+
+    track.innerHTML = prestasiData.map((item, index) => `
+        <article class="bg-white rounded-xl shadow-sm border overflow-hidden card-hover flex flex-col cursor-pointer shrink-0" style="width: calc((100% - 3*1.25rem) / 4)" onclick="openPrestasi(${index})">
+            <img src="${item.img}" alt="${item.title}" class="w-full h-56 object-cover">
+            <div class="p-4 flex flex-col flex-1">
+                <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-xs font-semibold text-blue-600 bg-blue-100 px-2 py-0.5 rounded-full">${item.level}</span>
+                    <span class="text-xs text-gray-400">${item.date}</span>
+                </div>
+                <h4 class="text-sm font-bold text-gray-900 mb-1.5 leading-snug line-clamp-2">${item.title}</h4>
+                <p class="text-xs text-gray-500 leading-relaxed flex-1 line-clamp-2">${item.summary}</p>
+                <button onclick="event.stopPropagation();openPrestasi(${index})" class="text-xs text-blue-600 font-semibold mt-2 inline-flex items-center hover:text-blue-800 transition">Baca Selengkapnya <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path></svg></button>
+            </div>
+        </article>
+    `).join('');
+
+    const dotsWrap = document.getElementById('prestasiDots');
+    if (dotsWrap) {
+        dotsWrap.innerHTML = prestasiData.map((_, index) => `<button class="prestasi-dot w-3 h-3 rounded-full ${index === 0 ? 'bg-blue-600' : 'bg-gray-300'} transition-all" onclick="goToPrestasiSlide(${index})"></button>`).join('');
+    }
+
+    currentPrestasiSlide = 0;
+    updatePrestasiSlider();
+}
+
+function openPrestasi(index) {
+    const p = prestasiData[index];
+    if (!p) return;
+
+    document.getElementById('prestasiModalImgSrc').src = p.img;
+    const tag = document.getElementById('prestasiModalTag');
+    tag.textContent = p.level;
+    tag.className = 'text-xs font-semibold px-2 py-0.5 rounded-full ' + p.tagClass;
+    document.getElementById('prestasiModalDate').textContent = p.date;
+    document.getElementById('prestasiModalTitle').textContent = p.title;
+    document.getElementById('prestasiModalBody').innerHTML = `<p>${p.body}</p>`;
+    document.getElementById('prestasiModal').classList.add('active');
+    document.body.style.overflow = 'hidden';
+}
+
+function closePrestasi() {
+    document.getElementById('prestasiModal').classList.remove('active');
+    document.body.style.overflow = 'auto';
+}
+
+function handlePrestasiModalClick(event) {
+    if (event.target.id === 'prestasiModal') closePrestasi();
 }
 
 // =====================
@@ -677,6 +808,71 @@ function goToBeritaSlide(index) {
     updateBeritaSlider();
 }
 
+let currentPrestasiSlide = 0;
+
+function getPrestasiVisibleCount() {
+    if (window.innerWidth < 768) return 1;
+    if (window.innerWidth < 1024) return 2;
+    return 3;
+}
+
+function updatePrestasiSlider() {
+    const track = document.getElementById('prestasiTrack');
+    if (!track) return;
+
+    const dots = document.querySelectorAll('.prestasi-dot');
+    const cards = track.querySelectorAll('article');
+    if (!cards.length) return;
+
+    const visibleCount = getPrestasiVisibleCount();
+    const maxSlide = Math.max(cards.length - visibleCount, 0);
+
+    if (currentPrestasiSlide > maxSlide) currentPrestasiSlide = maxSlide;
+    if (currentPrestasiSlide < 0) currentPrestasiSlide = 0;
+
+    const gap = 20;
+    const trackWidth = track.parentElement.offsetWidth;
+    const cardWidth = (trackWidth - gap * (visibleCount - 1)) / visibleCount;
+    const offset = currentPrestasiSlide * (cardWidth + gap);
+
+    track.style.transform = `translateX(-${offset}px)`;
+
+    cards.forEach(card => {
+        card.style.width = cardWidth + 'px';
+    });
+
+    dots.forEach((dot, i) => {
+        dot.style.backgroundColor = i === currentPrestasiSlide ? '#2563eb' : '#d1d5db';
+        dot.style.width = i === currentPrestasiSlide ? '2rem' : '0.75rem';
+        dot.style.borderRadius = i === currentPrestasiSlide ? '6px' : '9999px';
+    });
+}
+
+function nextPrestasiSlide() {
+    const track = document.getElementById('prestasiTrack');
+    if (!track) return;
+
+    const cards = track.querySelectorAll('article');
+    const maxSlide = Math.max(cards.length - getPrestasiVisibleCount(), 0);
+    currentPrestasiSlide = currentPrestasiSlide >= maxSlide ? 0 : currentPrestasiSlide + 1;
+    updatePrestasiSlider();
+}
+
+function prevPrestasiSlide() {
+    const track = document.getElementById('prestasiTrack');
+    if (!track) return;
+
+    const cards = track.querySelectorAll('article');
+    const maxSlide = Math.max(cards.length - getPrestasiVisibleCount(), 0);
+    currentPrestasiSlide = currentPrestasiSlide <= 0 ? maxSlide : currentPrestasiSlide - 1;
+    updatePrestasiSlider();
+}
+
+function goToPrestasiSlide(index) {
+    currentPrestasiSlide = index;
+    updatePrestasiSlider();
+}
+
 window.addEventListener('DOMContentLoaded', function() {
     if (Array.isArray(window.cmsTeachersData) && window.cmsTeachersData.length) {
         renderTeachersFromCms(window.cmsTeachersData);
@@ -690,6 +886,14 @@ window.addEventListener('DOMContentLoaded', function() {
         renderNewsFromCms(window.cmsNewsData);
     }
 
+    if (Array.isArray(window.cmsAchievementsData) && window.cmsAchievementsData.length) {
+        renderPrestasiFromCms(window.cmsAchievementsData);
+    }
+
     updateBeritaSlider();
+    updatePrestasiSlider();
 });
-window.addEventListener('resize', updateBeritaSlider);
+window.addEventListener('resize', function() {
+    updateBeritaSlider();
+    updatePrestasiSlider();
+});
